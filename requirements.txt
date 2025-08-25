@@ -1,2 +1,4 @@
 pydantic>=1.10,<2
 sqlalchemy>=1.4
+fastapi
+uvicorn[standard]
