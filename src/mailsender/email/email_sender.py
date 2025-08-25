@@ -8,5 +8,5 @@ def send_generated_email(email_data: Dict) -> None:
     send_email(
         recipient=email_data["recipient"],
         subject=email_data["subject"],
-        html_body=email_data["body"],
-    )
+        body=email_data["body"],
+        )
