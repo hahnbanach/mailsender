@@ -21,8 +21,6 @@ The configuration file needs:
 ## Setup
 
 ```
-pip install fastapi
-pip install "uvicorn[standard]"
 pip install -r requirements.txt
 python scripts/create_lead_table.py
 python scripts/create_campaign_table.py
