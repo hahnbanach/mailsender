@@ -34,7 +34,7 @@ The data about the lead are stored in a SQLite table named `lead`. Mandatory fie
 - `phone_number`
 - `email_address`
 - `opt_in` (true/false)
-- `other_info` (JSON)
+- `custom_args` (JSON)
  
 ## Campaign tracking
 
