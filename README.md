@@ -6,7 +6,7 @@ MrSender is a system for sending email to leads and call them soon after
 
 MrSender takes information about a lead and generates a message according to a prompt and the information you have about the lead. At the same time it creates a new contact on a MrCall phone assistant.
 
-It then sends the message through sendgrid APIs. When the lead opens the email, MrSender makes a call to MrCall's APIs and generates an outbound call to the lead.
+It then sends the message through sendgrid APIs. SendGrid posts events such as email opens to the `/tracking` webhook, which records them in the `campaign` table and can be used to trigger calls to MrCall.
 
 ## Configuration
 
@@ -18,6 +18,17 @@ The configuration file needs:
 - EMAIL_PROMPT is the prompt used for generating the messages
 - DATABASE_URL pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 
+## Setup
+
+```
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install -r requirements.txt
+python scripts/create_lead_table.py
+python scripts/create_campaign_table.py
+uvicorn src.mailsender.api.main:app --reload
+```
+
 ## Data about the leads
 
 The data about the lead are stored in a SQLite table named `lead`. Mandatory fields are:
@@ -26,13 +37,26 @@ The data about the lead are stored in a SQLite table named `lead`. Mandatory fie
 - `email_address`
 - `opt_in` (true/false)
 - `other_info` (JSON)
+ 
+## Campaign tracking
 
-Install dependencies and create the database tables with:
+SendGrid sends POST requests to `/tracking` with payloads like:
 
 ```
-pip install -r requirements.txt
-python scripts/create_lead_table.py
+{
+  "email": "user@example.com",
+  "timestamp": 1692981125,
+  "event": "open",
+  "sg_message_id": "xxx.yyy.zzz",
+  "smtp-id": "<20250825121500.12345@domain.com>",
+  "custom_args": {
+    "user_id": "42",
+    "order_id": "9876"
+  }
+}
 ```
+
+These events are stored in the `campaign` table.
 
 ## Workflow details
 
@@ -40,4 +64,4 @@ MrSender offers a webservice (FastAPI)
 
 1. For each lead with opt_in == true, MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
 2. Send an email to each lead through sendgrid.
-3. When a lead opens the email, MrSender triggers a call to mrcall.ai API for calling the lead.
+3. SendGrid posts email events to `/tracking`, storing them for further processing.
