@@ -4,9 +4,9 @@ MrSender is a system for sending email to leads and call them soon after
 
 ## How does it work
 
-MrSender takes information about a lead, generate a message according to a prompt and the information you have about the lead. At the same tima it creates a new contact on a MrCall phone assistant.
+MrSender takes information about a lead and generates a message according to a prompt and the information you have about the lead. At the same time it creates a new contact on a MrCall phone assistant.
 
-It then sends the message through sendgrid APIs. When the lead opens the email, MrSender is notified through a pixel download. At this point MrSender makes a call to MrCall's APIs and generate an outbound call to the lead.
+It then sends the message through sendgrid APIs. When the lead opens the email, MrSender makes a call to MrCall's APIs and generates an outbound call to the lead.
 
 ## Configuration
 
@@ -16,21 +16,28 @@ The configuration file needs:
 - SENDGRID_KEY for sending email messages
 - MRCALL_USER, MRCALL_PASSWORD and MRCALL_BUSINESS_ID for making the calls
 - EMAIL_PROMPT is the prompt used for generating the messages
+- DATABASE_URL pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 
-## Data about tbe leads
+## Data about the leads
 
-The data about the lead are stored in a postgres table. Mandatory fields are:
+The data about the lead are stored in a SQLite table named `lead`. Mandatory fields are:
 
-phone_number, email_address, opt_in (true/false)
+- `phone_number`
+- `email_address`
+- `opt_in` (true/false)
+- `other_info` (JSON)
 
-Other fields like name, company name etc are desirable and stored in a JSON field (other_info)
+Install dependencies and create the database tables with:
+
+```
+pip install -r requirements.txt
+python scripts/create_lead_table.py
+```
 
 ## Workflow details
 
-MrSender offers a webservice (FastAPI) 
+MrSender offers a webservice (FastAPI)
 
-1. For each lead with opt_in == true, MrSender creates a new url which associates to this sender and allows the download of a pixel
-2. Create an HTML email with subject etc, using the prompt stored in EMAIL_PROMPT. The email message alsoc contains the pixel associated to the lead with the correspondent URL
-3. Send an email to each lead through sendgrid
-4. When a lead opens the email, they download the pixel and MrSender knows the message has been opened
-5. As soon as MrSender receives the opening notification, it calls mrcall.ai API for calling the lead
+1. For each lead with opt_in == true, MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
+2. Send an email to each lead through sendgrid.
+3. When a lead opens the email, MrSender triggers a call to mrcall.ai API for calling the lead.

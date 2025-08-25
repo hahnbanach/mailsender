@@ -5,10 +5,10 @@ from ..config.settings import settings
 from ..services import openai_client
 
 
-def generate_email(email_address: str, other_info: Dict, pixel_url: str) -> Dict:
+def generate_email(email_address: str, other_info: Dict) -> Dict:
     """Generate email content using OpenAI based on lead info."""
     prompt = settings.email_prompt.format(
-        email_address=email_address, other_info=other_info, pixel_url=pixel_url
+        email_address=email_address, other_info=other_info
     )
     response_text = openai_client.generate_email(prompt)
     return json.loads(response_text)
