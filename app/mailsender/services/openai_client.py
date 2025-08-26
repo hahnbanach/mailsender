@@ -14,10 +14,7 @@ def generate_email(
     max_tokens: int = 500,
     temperature: float | None = None,
 ) -> str:
-    """Generate an email using OpenAI's Responses API.
-
-    Parameters can override the defaults from ``settings.ini``.
-    """
+    """Generate an email body using OpenAI's Responses API."""
     params = {
         "model": model or settings.openai_model,
         "input": prompt,
@@ -31,6 +28,10 @@ def generate_email(
     except OpenAIError as exc:
         raise OpenAIError(f"Failed to generate email: {exc}") from exc
     logger.debug("OpenAI raw response: %s", response)
-    if response.output_text is None:
+    if response.status != "completed":
+        raise OpenAIError(f"OpenAI response status {response.status}")
+    output_text = response.output_text or ""
+    if not output_text.strip():
         raise OpenAIError("OpenAI response contained no text output")
-    return response.output_text
+    return output_text
+  

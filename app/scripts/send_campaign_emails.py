@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from mailsender.config.settings import settings
 from mailsender.db.models import Lead
 from mailsender.db.session import SessionLocal
+from openai import OpenAIError
 from mailsender.services import openai_client
 from mailsender.services.sendgrid_client import send_email
 
@@ -33,28 +34,23 @@ def send_campaign_emails(campaign_id: str, sender: str) -> None:
             email_address=lead.email_address, custom_args=custom_args
         )
         logger.debug("Prompt: %s", prompt)
-        response_text = openai_client.generate_email(prompt)
-        logger.debug("Generated text: %s", response_text)
         try:
-            email_data = json.loads(response_text)
-        except json.JSONDecodeError:
-            logger.error(
-                "OpenAI response not valid JSON for %s: %s",
-                lead.email_address,
-                response_text,
-            )
+            body = openai_client.generate_email(prompt)
+        except OpenAIError as exc:
+            logger.error("OpenAI error for %s: %s", lead.email_address, exc)
             continue
-        logger.debug("Email data: %s", email_data)
+        logger.debug("Generated body: %s", body)
+        subject = f"Campaign {campaign_id}"
         logger.debug(
             "Sending email to %s with subject %r and body %r",
             lead.email_address,
-            email_data.get("subject"),
-            email_data.get("body"),
+            subject,
+            body,
         )
         send_email(
             recipient=lead.email_address,
-            subject=email_data.get("subject", f"Campaign {campaign_id}"),
-            body=email_data.get("body", ""),
+            subject=subject,
+            body=body,
             body_type="text/html",
             from_email=sender,
             from_name="SG Test",
