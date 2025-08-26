@@ -1,13 +1,13 @@
 """Application configuration loaded from ``settings.ini``.
 
 This module defines the :class:`Settings` object which reads configuration
-values from the project level ``settings.ini`` file. The file is expected to
-contain a ``[settings]`` section with keys matching the fields defined in the
+values from ``app/resources/settings.ini``. The file is expected to contain a
+``[settings]`` section with keys matching the fields defined in the
 ``Settings`` model below. Defaults are provided for all fields so the
 application can run even when the file is missing or incomplete.
 
-The loader searches upwards from this file's location to find
-``settings.ini``. If it cannot be found, the defaults are used.
+Only ``app/resources/settings.ini`` is considered; other ``settings.ini``
+files are ignored. If the file is absent, the defaults are used.
 """
 
 from configparser import ConfigParser
@@ -31,17 +31,23 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./mailsender.db"
 
 def _load_from_ini() -> Dict[str, str]:
-    """Load configuration values from the nearest ``settings.ini`` file."""
+    """Load configuration values from ``app/resources/settings.ini``."""
     config: Dict[str, str] = {}
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        candidate = parent / "settings.ini"
-        if candidate.exists():
-            parser = ConfigParser()
-            parser.read(candidate)
-            if parser.has_section("settings"):
-                config = {k: v for k, v in parser.items("settings") if v}
-            break
+    candidate = Path(__file__).resolve().parents[2] / "resources" / "settings.ini"
+    if candidate.exists():
+        parser = ConfigParser()
+        parser.read(candidate)
+        if parser.has_section("settings"):
+            for k, v in parser.items("settings"):
+                if not v:
+                    continue
+                if k == "database_url" and v.startswith("sqlite:///"):
+                    db_path = v.replace("sqlite:///", "")
+                    if not Path(db_path).is_absolute():
+                        db_path = (candidate.parent / db_path).resolve()
+                    config[k] = f"sqlite:///{db_path}"
+                else:
+                    config[k] = v
     return config
 
 
