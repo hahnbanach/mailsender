@@ -1,12 +1,6 @@
-from typing import Dict
-
 from ..services.sendgrid_client import send_email
 
 
-def send_generated_email(email_data: Dict) -> None:
-    """Send generated email data using SendGrid."""
-    send_email(
-        recipient=email_data["recipient"],
-        subject=email_data["subject"],
-        body=email_data["body"],
-        )
+def send_generated_email(recipient: str, body: str, subject: str = "Campaign") -> None:
+    """Send generated email body using SendGrid."""
+    send_email(recipient=recipient, subject=subject, body=body)

@@ -17,15 +17,18 @@ def send_emails(leads: Iterable[Lead]) -> None:
         custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
         if custom_args != lead.custom_args:
             logger.debug("Lead %s has invalid custom_args: %r", lead.id, lead.custom_args)
-        if "campaign_id" in custom_args:
-            custom_args.pop("campaign_id")
+        campaign_id = custom_args.pop("campaign_id", None)
+        if campaign_id is not None:
             logger.debug("Removed campaign_id from custom_args for lead %s", lead.id)
         lead.custom_args = custom_args
-        email_data = email_generator.generate_email(
+        body = email_generator.generate_email(
             email_address=lead.email_address,
             custom_args=custom_args,
         )
-        email_sender.send_generated_email(email_data)
+        subject = f"Campaign {campaign_id}" if campaign_id else "Campaign"
+        email_sender.send_generated_email(
+            recipient=lead.email_address, body=body, subject=subject
+        )
         db.add(lead)
     db.commit()
     db.close()
