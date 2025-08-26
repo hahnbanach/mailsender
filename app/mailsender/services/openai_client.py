@@ -11,13 +11,14 @@ client = OpenAI(api_key=settings.openai_key)
 def generate_email(
     prompt: str,
     model: str | None = None,
-    max_tokens: int | None = 1000,
+    max_tokens: int | None = 2000,
     temperature: float | None = None,
 ) -> str:
     """Generate an email body using OpenAI's Responses API."""
     params = {
         "model": model or settings.openai_model,
         "input": prompt,
+        "reasoning": {"effort": "low"},
     }
     if max_tokens is not None:
         params["max_output_tokens"] = max_tokens
