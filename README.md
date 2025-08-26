@@ -55,7 +55,7 @@ uvicorn app.main:app --reload
 ### Send campaign emails
 
 ```
-python app/scripts/send_campaign_emails.py --sender you@example.com
+python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example.com
 ```
 
 ## Data about the leads
