@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     mrcall_password: str = "mrcall_password"
     mrcall_business_id: str = "mrcall_business"
     email_prompt: str = (
-        "Genera il corpo HTML per {email_address}. Dati lead: {custom_args}"
+        "Sei un assistente che scrive email molto semplici e naturali. "
+        "Crea il corpo della mail per {email_address} usando i dati del lead: {custom_args}"
     )
     database_url: str = "sqlite:///./mailsender.db"
 

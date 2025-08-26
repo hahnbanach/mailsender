@@ -4,7 +4,7 @@ MrSender is a system for sending email to leads and call them soon after
 
 ## How does it work
 
-MrSender takes information about a lead and generates a message according to a prompt and the information you have about the lead. At the same time it creates a new contact on a MrCall phone assistant.
+MrSender takes information about a lead and generates a message according to a prompt and the information you have about the lead. The assistant is instructed to craft simple, human-like email bodies for the lead. At the same time it creates a new contact on a MrCall phone assistant.
 
 It then sends the message through sendgrid APIs. SendGrid posts events such as email opens to the `/tracking` webhook, which records them in the `campaign` table and can be used to trigger calls to MrCall.
 
@@ -16,7 +16,7 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `openai_key` for generating the message
 - `sendgrid_key` for sending email messages
 - `mrcall_user`, `mrcall_password` and `mrcall_business_id` for making the calls
-- `email_prompt` is the prompt used for generating the messages
+- `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 
 ## Installation
