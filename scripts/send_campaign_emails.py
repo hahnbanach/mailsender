@@ -12,7 +12,7 @@ from mailsender.services.sendgrid_client import send_email
 def send_campaign_emails(campaign_id: str) -> None:
     db = SessionLocal()
     leads = db.query(Lead).filter(
-        Lead.custom_args["campaign_id"].astext == campaign_id
+        Lead.custom_args["campaign_id"].as_string() == campaign_id
     ).all()
     db.close()
     for lead in leads:
