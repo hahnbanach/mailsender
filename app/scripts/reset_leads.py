@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from mailsender.db.models import Lead
 from mailsender.db.session import SessionLocal
