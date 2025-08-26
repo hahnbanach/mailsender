@@ -25,7 +25,7 @@ project root (a symlink to `app/resources/settings_template.ini`). Populate the
 Create and activate a virtual environment, then install the dependencies:
 
 ```
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r app/requirements.txt
 ```
