@@ -12,7 +12,7 @@ def send_emails(leads: Iterable[Lead]) -> None:
     for lead in leads:
         email_data = email_generator.generate_email(
             email_address=lead.email_address,
-            other_info=lead.other_info or {},
+            custom_args=lead.custom_args or {},
         )
         email_sender.send_generated_email(email_data)
         db.add(lead)
