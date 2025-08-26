@@ -24,6 +24,7 @@ The configuration file needs:
 pip install -r requirements.txt
 python scripts/create_lead_table.py
 python scripts/create_campaign_table.py
+python scripts/reset_leads.py
 uvicorn src.mailsender.api.main:app --reload
 ```
 
@@ -34,7 +35,7 @@ The data about the lead are stored in a SQLite table named `lead`. Mandatory fie
 - `phone_number`
 - `email_address`
 - `opt_in` (true/false)
-- `other_info` (JSON)
+- `custom_args` (JSON)
  
 ## Campaign tracking
 

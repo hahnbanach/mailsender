@@ -11,7 +11,7 @@ class Lead(Base):
     phone_number = Column(String, nullable=True)
     email_address = Column(String, unique=True, index=True, nullable=False)
     opt_in = Column(Boolean, default=True)
-    other_info = Column(JSON, default=dict)
+    custom_args = Column(JSON, default=dict)
 
 
 class Campaign(Base):

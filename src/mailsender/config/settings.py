@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     email_prompt: str = (
         "Generate a JSON object with fields `recipient`, `subject`, and `body` "
         "for the recipient `{email_address}` using additional lead details "
-        "`{other_info}`. The body must be HTML."
+        "`{custom_args}`. The body must be HTML."
     )
     database_url: str = "sqlite:///./mailsender.db"
 
