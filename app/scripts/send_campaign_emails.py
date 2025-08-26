@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import json
 import os
 import sys
 
@@ -31,7 +32,8 @@ def send_campaign_emails(campaign_id: str, sender: str) -> None:
         if "campaign_id" in custom_args:
             custom_args.pop("campaign_id")
         prompt = settings.email_prompt.format(
-            email_address=lead.email_address, custom_args=custom_args
+            email_address=lead.email_address,
+            custom_args=json.dumps(custom_args, ensure_ascii=False),
         )
         logger.debug("Prompt: %s", prompt)
         try:
