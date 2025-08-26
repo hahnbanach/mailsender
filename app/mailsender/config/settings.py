@@ -23,11 +23,7 @@ class Settings(BaseSettings):
     mrcall_user: str = "mrcall_user"
     mrcall_password: str = "mrcall_password"
     mrcall_business_id: str = "mrcall_business"
-    email_prompt: str = (
-        "Generate a JSON object with fields `recipient`, `subject`, and `body` "
-        "for the recipient `{email_address}` using additional lead details "
-        "`{custom_args}`. The body must be HTML."
-    )
+    email_prompt: str = "Genera l'oggetto e il corpo HTML per {email_address}. Dati lead:"
     database_url: str = "sqlite:///./mailsender.db"
 
 def _load_from_ini() -> Dict[str, str]:
