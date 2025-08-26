@@ -30,7 +30,7 @@ def send_campaign_emails(campaign_id: str, sender: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("campaign_id")
+    parser.add_argument("--id", required=True, help="Campaign ID")
     parser.add_argument("--sender", required=True, help="Sender email address")
     args = parser.parse_args()
-    send_campaign_emails(args.campaign_id, args.sender)
+    send_campaign_emails(args.id, args.sender)
