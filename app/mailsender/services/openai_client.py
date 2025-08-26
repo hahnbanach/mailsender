@@ -34,3 +34,4 @@ def generate_email(
     if not output_text.strip():
         raise OpenAIError("OpenAI response contained no text output")
     return output_text
+  
