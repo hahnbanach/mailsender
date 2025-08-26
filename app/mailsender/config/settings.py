@@ -19,6 +19,7 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     openai_key: str = "sk-dummy"
+    openai_model: str = "gpt-5-mini"
     sendgrid_key: str = "sendgrid-dummy"
     mrcall_user: str = "mrcall_user"
     mrcall_password: str = "mrcall_password"
