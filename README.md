@@ -10,8 +10,7 @@ It then sends the message through sendgrid APIs. SendGrid posts events such as e
 
 ## Configuration
 
-Configuration values are read from a `settings.ini` file located at the
-project root (a symlink to `app/resources/settings_template.ini`). Populate the
+Configuration values are read from `app/resources/settings.ini`. Populate the
 `[settings]` section with the following keys:
 
 - `openai_key` for generating the message
