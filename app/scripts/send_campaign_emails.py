@@ -2,14 +2,14 @@ import argparse
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from mailsender.db.models import Lead
 from mailsender.db.session import SessionLocal
 from mailsender.services.sendgrid_client import send_email
 
 
-def send_campaign_emails(campaign_id: str) -> None:
+def send_campaign_emails(campaign_id: str, sender: str) -> None:
     db = SessionLocal()
     leads = db.query(Lead).filter(
         Lead.custom_args["campaign_id"].as_string() == campaign_id
@@ -21,7 +21,7 @@ def send_campaign_emails(campaign_id: str) -> None:
             subject="SG sandbox test" if campaign_id == "sandbox_mode" else f"Campaign {campaign_id}",
             body="Hello from sandbox" if campaign_id == "sandbox_mode" else f"Hello from campaign {campaign_id}",
             body_type="text/plain",
-            from_email="test@yourdomain.com",
+            from_email=sender,
             from_name="SG Test",
             custom_args={"campaign_id": campaign_id},
             sandbox_mode=(campaign_id == "sandbox_mode"),
@@ -31,5 +31,6 @@ def send_campaign_emails(campaign_id: str) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("campaign_id")
+    parser.add_argument("--sender", required=True, help="Sender email address")
     args = parser.parse_args()
-    send_campaign_emails(args.campaign_id)
+    send_campaign_emails(args.campaign_id, args.sender)

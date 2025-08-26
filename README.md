@@ -10,22 +10,52 @@ It then sends the message through sendgrid APIs. SendGrid posts events such as e
 
 ## Configuration
 
-The configuration file needs:
+Configuration values are read from a `settings.ini` file located at the
+project root (a symlink to `app/resources/settings_template.ini`). Populate the
+`[settings]` section with the following keys:
 
-- OPENAI_KEY for generating the message
-- SENDGRID_KEY for sending email messages
-- MRCALL_USER, MRCALL_PASSWORD and MRCALL_BUSINESS_ID for making the calls
-- EMAIL_PROMPT is the prompt used for generating the messages
-- DATABASE_URL pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
+- `openai_key` for generating the message
+- `sendgrid_key` for sending email messages
+- `mrcall_user`, `mrcall_password` and `mrcall_business_id` for making the calls
+- `email_prompt` is the prompt used for generating the messages
+- `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 
-## Setup
+## Installation
+
+Create and activate a virtual environment, then install the dependencies:
 
 ```
-pip install -r requirements.txt
-python scripts/create_lead_table.py
-python scripts/create_campaign_table.py
-python scripts/reset_leads.py
-uvicorn src.mailsender.api.main:app --reload
+python -m venv .venv
+source .venv/bin/activate
+pip install -r app/requirements.txt
+```
+
+You can also run the application with Docker:
+
+```
+docker-compose up --build
+```
+
+## Usage
+
+### Prepare the database
+
+```
+python app/scripts/create_lead_table.py
+python app/scripts/create_campaign_table.py
+python app/scripts/reset_leads.py
+```
+
+### Run the API
+
+```
+uvicorn app.main:app --reload
+```
+
+### Send campaign emails
+
+```
+python app/scripts/send_campaign_emails.py --sender you@example.com
 ```
 
 ## Data about the leads
@@ -64,3 +94,11 @@ MrSender offers a webservice (FastAPI)
 1. For each lead with opt_in == true, MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
 2. Send an email to each lead through sendgrid.
 3. SendGrid posts email events to `/tracking`, storing them for further processing.
+
+## Testing
+
+Run a syntax check across all Python modules:
+
+```
+python -m py_compile $(git ls-files '*.py')
+```
