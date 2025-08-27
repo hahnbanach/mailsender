@@ -18,6 +18,8 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `mrcall_token` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
+- `body` optional HTML template used when `--body-ai 0`; placeholders like `{name}` are
+  replaced with values from `lead.custom_args`
 
 ## Installation
 
@@ -65,8 +67,12 @@ PYTHONPATH=app uvicorn main:app --reload
 ### Send campaign emails
 
 ```
-python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example.com
+python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example.com [--body-ai 0|1]
 ```
+
+Use `--body-ai 0` to send the `body` template from the configuration instead of
+generating content with OpenAI. Unmatched placeholders in the template are
+removed.
 
 ## Data about the leads
 
