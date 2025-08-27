@@ -69,10 +69,8 @@ Alternatively, run `uvicorn` directly and control verbosity with its
 uvicorn app.main:app --reload --log-level debug
 ```
 
-Set the `LOG_LEVEL` environment variable to control verbosity (default is
-`INFO`).
-
-Alternatively, run `uvicorn` directly:
+Use `--debug` for verbose output or set the `LOG_LEVEL` environment
+variable to another level:
 
 ```
 cd app && uvicorn main:app --reload --log-level debug

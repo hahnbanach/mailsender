@@ -1,4 +1,5 @@
-from fastapi import Depends, FastAPI
+import logging
+from fastapi import Depends, FastAPI, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List
@@ -7,7 +8,18 @@ from ..db.models import Campaign, Lead
 from ..db.session import SessionLocal
 from ..services.mrcall_client import start_call
 
+logger = logging.getLogger(__name__)
 app = FastAPI()
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.debug("HTTP %s %s", request.method, request.url.path)
+    response = await call_next(request)
+    logger.debug(
+        "HTTP %s %s -> %d", request.method, request.url.path, response.status_code
+    )
+    return response
 
 
 class TrackingEvent(BaseModel):
