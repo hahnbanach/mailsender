@@ -11,6 +11,7 @@ class Lead(Base):
     phone_number = Column(String, nullable=True)
     email_address = Column(String, unique=True, index=True, nullable=False)
     opt_in = Column(Boolean, default=True)
+    open_called = Column(Boolean, default=False, nullable=False)
     custom_args = Column(JSON, default=dict)
 
 

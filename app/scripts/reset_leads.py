@@ -15,6 +15,7 @@ def reset_leads() -> None:
         email_address="mario@example.com",
         phone_number="+390221102420",
         opt_in=True,
+        open_called=False,
         custom_args={"campaign_id": "sandbox_mode"},
     )
     db.add(lead)
