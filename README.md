@@ -52,6 +52,14 @@ python app/scripts/reset_leads.py
 Start the API server from the repository root:
 
 ```
+python app/main.py [--debug]
+```
+
+Use `--debug` to enable verbose logging.
+
+Alternatively, you can run `uvicorn` directly:
+
+```
 uvicorn app.main:app --reload
 ```
 
