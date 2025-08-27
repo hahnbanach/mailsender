@@ -28,6 +28,7 @@ class Settings(BaseSettings):
         "Crea il corpo della mail per {email_address} usando i dati del lead: {custom_args}"
     )
     database_url: str = "sqlite:///./mailsender.db"
+    body: str = ""
 
 def _load_from_ini() -> Dict[str, str]:
     """Load configuration values from ``app/resources/settings.ini``."""
@@ -38,7 +39,7 @@ def _load_from_ini() -> Dict[str, str]:
         parser.read(candidate)
         if parser.has_section("settings"):
             for k, v in parser.items("settings"):
-                if not v:
+                if not v and k != "body":
                     continue
                 if k == "database_url" and v.startswith("sqlite:///"):
                     db_path = v.replace("sqlite:///", "")
