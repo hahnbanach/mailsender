@@ -1,8 +1,11 @@
+import logging
 import requests
 
 from ..config.settings import settings
 
 SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
+
+logger = logging.getLogger(__name__)
 
 
 def send_email(
@@ -35,5 +38,7 @@ def send_email(
         "Authorization": f"Bearer {settings.sendgrid_key}",
         "Content-Type": "application/json",
     }
+    logger.debug("SendGrid request: %s", payload)
     response = requests.post(SENDGRID_API_URL, json=payload, headers=headers, timeout=10)
+    logger.debug("SendGrid response %s: %s", response.status_code, response.text)
     response.raise_for_status()
