@@ -18,7 +18,7 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `mrcall_token` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
-- `body` optional HTML template used when `--body-ai 0`; placeholders like `{name}` are
+- `body` optional HTML template used when `--body-ai 1`; placeholders like `{name}` are
   replaced with values from `lead.custom_args`
 
 ## Installation
@@ -61,16 +61,7 @@ Set the `LOG_LEVEL` environment variable to control verbosity (default is
 Alternatively, run `uvicorn` directly:
 
 ```
-LOG_LEVEL=debug uvicorn app.main:app --reload --log-level debug
-```
-
-If you prefer to run `uvicorn` without the `app.` prefix, change into the
-`app` directory or set the `PYTHONPATH` environment variable:
-
-```
-cd app && LOG_LEVEL=debug uvicorn main:app --reload --log-level debug
-# or
-LOG_LEVEL=debug PYTHONPATH=app uvicorn main:app --reload --log-level debug
+uvicorn app.main:app --reload --log-level debug
 ```
 
 ### Send campaign emails
@@ -79,7 +70,7 @@ LOG_LEVEL=debug PYTHONPATH=app uvicorn main:app --reload --log-level debug
 python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example.com [--body-ai 0|1]
 ```
 
-Use `--body-ai 0` to send the `body` template from the configuration instead of
+Use `--body-ai 1` to send the `body` template from the configuration instead of
 generating content with OpenAI. Unmatched placeholders in the template are
 removed.
 
