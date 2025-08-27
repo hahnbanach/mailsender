@@ -52,16 +52,25 @@ python app/scripts/reset_leads.py
 Start the API server from the repository root:
 
 ```
-uvicorn app.main:app --reload
+LOG_LEVEL=debug python app/main.py
+```
+
+Set the `LOG_LEVEL` environment variable to control verbosity (default is
+`INFO`).
+
+Alternatively, run `uvicorn` directly:
+
+```
+LOG_LEVEL=debug uvicorn app.main:app --reload --log-level debug
 ```
 
 If you prefer to run `uvicorn` without the `app.` prefix, change into the
 `app` directory or set the `PYTHONPATH` environment variable:
 
 ```
-cd app && uvicorn main:app --reload
+cd app && LOG_LEVEL=debug uvicorn main:app --reload --log-level debug
 # or
-PYTHONPATH=app uvicorn main:app --reload
+LOG_LEVEL=debug PYTHONPATH=app uvicorn main:app --reload --log-level debug
 ```
 
 ### Send campaign emails
