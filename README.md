@@ -47,8 +47,19 @@ python app/scripts/reset_leads.py
 
 ### Run the API
 
+Start the API server from the repository root:
+
 ```
 uvicorn app.main:app --reload
+```
+
+If you prefer to run `uvicorn` without the `app.` prefix, change into the
+`app` directory or set the `PYTHONPATH` environment variable:
+
+```
+cd app && uvicorn main:app --reload
+# or
+PYTHONPATH=app uvicorn main:app --reload
 ```
 
 ### Send campaign emails
