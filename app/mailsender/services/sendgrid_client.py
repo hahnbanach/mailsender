@@ -24,6 +24,7 @@ def send_email(
         "personalizations": [personalization],
         "from": {"email": from_email},
         "subject": subject,
+        "tracking_settings":{"open_tracking":{"enable": True}},
         "content": [{"type": body_type, "value": body}],
     }
     if from_name:
