@@ -52,7 +52,21 @@ python app/scripts/reset_leads.py
 Start the API server from the repository root:
 
 ```
-LOG_LEVEL=debug python app/main.py
+python app/main.py --debug
+```
+
+Use `--debug` for verbose output or set the `LOG_LEVEL` environment
+variable to another level:
+
+```
+LOG_LEVEL=warning python app/main.py
+```
+
+Alternatively, run `uvicorn` directly and control verbosity with its
+`--log-level` flag:
+
+```
+uvicorn app.main:app --reload --log-level debug
 ```
 
 Set the `LOG_LEVEL` environment variable to control verbosity (default is
@@ -61,7 +75,9 @@ Set the `LOG_LEVEL` environment variable to control verbosity (default is
 Alternatively, run `uvicorn` directly:
 
 ```
-uvicorn app.main:app --reload --log-level debug
+cd app && uvicorn main:app --reload --log-level debug
+# or
+PYTHONPATH=app uvicorn main:app --reload --log-level debug
 ```
 
 ### Send campaign emails
