@@ -41,7 +41,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
         custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
         if "campaign_id" in custom_args:
             custom_args.pop("campaign_id")
-        if body_ai == 0:
+        if body_ai:
             prompt = settings.email_prompt.format(
                 email_address=lead.email_address,
                 custom_args=json.dumps(custom_args, ensure_ascii=False),
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--id", required=True, help="Campaign ID")
     parser.add_argument("--sender", required=True, help="Sender email address")
-    parser.add_argument("--body-ai", dest="body_ai", type=int, choices=[0, 1], default=0)
+    parser.add_argument("--body-ai", dest="body_ai", type=int, choices=[0, 1], default=1)
     parser.add_argument(
         "-q",
         "--quiet",
