@@ -3,8 +3,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List
 
-from ..db.models import Campaign
+from ..db.models import Campaign, Lead
 from ..db.session import SessionLocal
+from ..services.mrcall_client import start_call
 
 app = FastAPI()
 
@@ -38,5 +39,10 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
             custom_args=event.custom_args,
         )
         db.add(record)
+        if event.event == "open":
+            lead = db.query(Lead).filter(Lead.email_address == event.email).first()
+            if lead and not lead.open_called and lead.phone_number:
+                start_call(lead.phone_number)
+                lead.open_called = True
     db.commit()
     return {"status": "ok"}
