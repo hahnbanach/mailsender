@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from ..db.models import Campaign
 from ..db.session import SessionLocal
@@ -27,15 +27,16 @@ def get_db() -> Session:
 
 
 @app.post("/tracking")
-def tracking(event: TrackingEvent, db: Session = Depends(get_db)) -> Dict[str, str]:
-    record = Campaign(
-        email=event.email,
-        timestamp=event.timestamp,
-        event=event.event,
-        sg_message_id=event.sg_message_id,
-        smtp_id=event.smtp_id,
-        custom_args=event.custom_args,
-    )
-    db.add(record)
+def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict[str, str]:
+    for event in events:
+        record = Campaign(
+            email=event.email,
+            timestamp=event.timestamp,
+            event=event.event,
+            sg_message_id=event.sg_message_id,
+            smtp_id=event.smtp_id,
+            custom_args=event.custom_args,
+        )
+        db.add(record)
     db.commit()
     return {"status": "ok"}

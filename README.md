@@ -82,20 +82,22 @@ The data about the lead are stored in a SQLite table named `lead`. Mandatory fie
 SendGrid sends POST requests to `/tracking` with payloads like:
 
 ```
-{
-  "email": "user@example.com",
-  "timestamp": 1692981125,
-  "event": "open",
-  "sg_message_id": "xxx.yyy.zzz",
-  "smtp-id": "<20250825121500.12345@domain.com>",
-  "custom_args": {
-    "user_id": "42",
-    "order_id": "9876"
+[
+  {
+    "email": "user@example.com",
+    "timestamp": 1692981125,
+    "event": "open",
+    "sg_message_id": "xxx.yyy.zzz",
+    "smtp-id": "<20250825121500.12345@domain.com>",
+    "custom_args": {
+      "user_id": "42",
+      "order_id": "9876"
+    }
   }
-}
+]
 ```
 
-These events are stored in the `campaign` table.
+Each object in the array is stored in the `campaign` table.
 
 ## Workflow details
 
