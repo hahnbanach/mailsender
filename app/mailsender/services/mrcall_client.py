@@ -1,17 +1,20 @@
+import base64
 import logging
 import requests
 
 from ..config.settings import settings
 
-MR_CALL_URL = "https://api.mrcall.ai/mrcall/v1/atom/d32b77ab-b8d5-30ce-afcb-0d477fd14279/outbound"
+MR_CALL_URL = f"https://api.mrcall.ai/mrcall/v1/atom/{settings.mrcall_business_id}/outbound"
 
 logger = logging.getLogger(__name__)
 
 
 def start_call(phone_number: str) -> dict:
     """Trigger an outbound call via MrCall."""
+    credentials = f"{settings.mrcall_username}:{settings.mrcall_password}".encode()
+    token = base64.b64encode(credentials).decode()
     headers = {
-        "Authorization": f"Basic {settings.mrcall_token}",
+        "Authorization": f"Basic {token}",
         "Content-Type": "application/json",
     }
     payload = {"toNumber": phone_number}
