@@ -15,7 +15,7 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 
 - `openai_key` for generating the message
 - `sendgrid_key` for sending email messages
-- `mrcall_token` and `mrcall_business_id` for making the calls
+- `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 - `body` optional HTML template used when `--body-ai 0`; placeholders like `{name}` are
