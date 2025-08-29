@@ -39,7 +39,7 @@ def get_db() -> Session:
         db.close()
 
 
-@app.post("/tracking")
+@app.post("/tracking/")
 def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict[str, str]:
     for event in events:
         record = Campaign(
