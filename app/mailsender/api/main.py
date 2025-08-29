@@ -56,5 +56,9 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
             if lead and not lead.open_called and lead.phone_number:
                 start_call(lead.phone_number)
                 lead.open_called = True
+        elif event.event == "unsubscribe":
+            lead = db.query(Lead).filter(Lead.email_address == event.email).first()
+            if lead:
+                lead.opt_in = False
     db.commit()
     return {"status": "ok"}

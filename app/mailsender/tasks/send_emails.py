@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 def send_emails(leads: Iterable[Lead]) -> None:
     db: Session = SessionLocal()
     for lead in leads:
+        if not lead.opt_in:
+            logger.debug("Lead %s has opted out; skipping email", lead.id)
+            continue
         custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
         if custom_args != lead.custom_args:
             logger.debug("Lead %s has invalid custom_args: %r", lead.id, lead.custom_args)
