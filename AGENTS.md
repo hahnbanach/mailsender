@@ -4,10 +4,6 @@ This repository contains scripts and services for generating and sending campaig
 
 ## Contributor Instructions
 - Use Python 3 for all scripts and modules.
-- Keep the OpenAI Python SDK up to date:
-  ```bash
-  pip install --upgrade openai
-  ```
 - Before committing, ensure all Python files compile:
   ```bash
   python -m py_compile $(git ls-files '*.py')
