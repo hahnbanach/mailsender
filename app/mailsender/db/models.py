@@ -1,17 +1,19 @@
-from sqlalchemy import Boolean, Column, Integer, JSON, String
+from sqlalchemy import Column, Integer, JSON, String
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
 
-class Lead(Base):
-    __tablename__ = "lead"
+class Contact(Base):
+    __tablename__ = "contact"
 
     id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, nullable=True)
-    email_address = Column(String, unique=True, index=True, nullable=False)
-    opt_in = Column(String, default="true")
-    open_called = Column(Boolean, default=False, nullable=False)
+    business_id = Column(String, nullable=False)
+    first = Column(String, nullable=True)
+    last = Column(String, nullable=True)
+    organizations = Column(JSON, default=list)
+    emails = Column(JSON, default=list)
+    variables = Column(JSON, default=dict)
     custom_args = Column(JSON, default=dict)
 
 

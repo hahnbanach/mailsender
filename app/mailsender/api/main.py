@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List
 
-from ..db.models import Campaign, Lead
+from ..db.models import Campaign, Contact
 from ..db.session import SessionLocal
 from ..services.mrcall_client import start_call
 
@@ -52,13 +52,28 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
         )
         db.add(record)
         if event.event == "open":
-            lead = db.query(Lead).filter(Lead.email_address == event.email).first()
-            if lead and not lead.open_called and lead.phone_number:
-                start_call(lead.phone_number)
-                lead.open_called = True
+            contact = (
+                db.query(Contact)
+                .filter(Contact.emails[0]["address"].as_string() == event.email)
+                .first()
+            )
+            if contact:
+                variables = contact.variables or {}
+                phone_number = variables.get("phone_number")
+                phonecall_made = variables.get("phonecall_made") == "true"
+                if not phonecall_made and phone_number:
+                    start_call(phone_number)
+                    variables["phonecall_made"] = "true"
+                    contact.variables = variables
         elif event.event == "unsubscribe":
-            lead = db.query(Lead).filter(Lead.email_address == event.email).first()
-            if lead:
-                lead.opt_in = "false"
+            contact = (
+                db.query(Contact)
+                .filter(Contact.emails[0]["address"].as_string() == event.email)
+                .first()
+            )
+            if contact:
+                variables = contact.variables or {}
+                variables["opt_in"] = "false"
+                contact.variables = variables
     db.commit()
     return {"status": "ok"}
