@@ -32,8 +32,8 @@ def create_tables() -> None:
                 "phonecall_answered": "false",
                 "sms_sent": "false",
                 "wa_sent": "false",
+                "campaign_id": "sandbox_mode",
             },
-            custom_args={"campaign_id": "sandbox_mode"},
         )
         db.add(contact)
         db.commit()
