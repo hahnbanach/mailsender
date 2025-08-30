@@ -59,6 +59,6 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
         elif event.event == "unsubscribe":
             lead = db.query(Lead).filter(Lead.email_address == event.email).first()
             if lead:
-                lead.opt_in = False
+                lead.opt_in = "false"
     db.commit()
     return {"status": "ok"}

@@ -14,7 +14,7 @@ def create_tables() -> None:
         lead = Lead(
             email_address="mario@example.com",
             phone_number="+390221102420",
-            opt_in=True,
+            opt_in="true",
             open_called=False,
             custom_args={"campaign_id": "sandbox_mode"},
         )
