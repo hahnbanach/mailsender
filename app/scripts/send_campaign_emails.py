@@ -19,10 +19,24 @@ logger = logging.getLogger(__name__)
 _PLACEHOLDER_RE = re.compile(r"{([^{}]+)}")
 
 
-def _apply_template(template: str, variables: dict) -> str:
+def _resolve_path(data: object, path: str):
+    """Resolve dotted path expressions like 'contact.first'."""
+    current = data
+    for part in path.split("."):
+        if isinstance(current, dict):
+            current = current.get(part)
+        else:
+            current = getattr(current, part, None)
+        if current is None:
+            return ""
+    return current
+
+
+def _apply_template(template: str, context: dict) -> str:
     def replacer(match: re.Match) -> str:
         key = match.group(1)
-        return str(variables.get(key, ""))
+        value = _resolve_path(context, key)
+        return "" if value is None else str(value)
 
     return _PLACEHOLDER_RE.sub(replacer, template)
 
@@ -51,6 +65,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
         variables = (
             contact.variables if isinstance(contact.variables, dict) else {}
         )
+        context = {"contact": contact}
         if body_ai:
             email_address = contact.emails[0]["address"] if contact.emails else ""
             prompt = settings.email_prompt.format(
@@ -66,7 +81,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
             logger.debug("Generated body: %s", body)
         else:
             logger.debug("Using body template: %s", settings.body)
-            body = _apply_template(settings.body, variables)
+            body = _apply_template(settings.body, context)
             logger.debug("Templated body: %s", body)
         subject = f"Campaign {campaign_id}"
         email_address = contact.emails[0]["address"] if contact.emails else ""
