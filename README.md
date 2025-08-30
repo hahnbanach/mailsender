@@ -19,8 +19,9 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the contact
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
-- `body` optional HTML template used when `--body-ai 0`; placeholders like `{name}` are
-  replaced with values from `contact.custom_args`
+- `body` optional HTML template used when `--body-ai 0`; placeholders like
+  `{contact.first}` or `{contact.variables.phone_number}` are replaced with
+  values from the corresponding contact fields
 
 ## Installation
 
@@ -86,8 +87,9 @@ python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example
 ```
 
 Use `--body-ai 0` to send the `body` template from the configuration instead of
-generating content with OpenAI. Unmatched placeholders in the template are
-removed.
+generating content with OpenAI. Placeholders such as `{contact.first}` or
+`{contact.variables.phone_number}` are replaced with the corresponding contact
+fields. Unmatched placeholders in the template are removed.
 
 ## Data about the contacts
 
