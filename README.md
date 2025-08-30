@@ -16,6 +16,8 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `openai_key` for generating the message
 - `sendgrid_key` for sending email messages
 - `from_name` displayed as the sender name in outgoing emails
+- `vonage_api_key` and `vonage_api_secret` for sending SMS via Vonage
+- `sms_from` displayed as the sender name in outgoing SMS
 - `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the contact
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
@@ -80,16 +82,17 @@ cd app && uvicorn main:app --reload --log-level debug
 PYTHONPATH=app uvicorn main:app --reload --log-level debug
 ```
 
-### Send campaign emails
+### Start a campaign
 
 ```
-python app/scripts/send_campaign_emails.py --id campaign_id --sender you@example.com [--body-ai 0|1]
+python app/scripts/start_campaign.py --id campaign_id --sender you@example.com [--body-ai 0|1] [--ctype email|sms]
 ```
 
 Use `--body-ai 0` to send the `body` template from the configuration instead of
 generating content with OpenAI. Placeholders such as `{contact.first}` or
 `{contact.variables.phone_number}` are replaced with the corresponding contact
-fields. Unmatched placeholders in the template are removed.
+fields. Use `--ctype sms` to send SMS messages through Vonage to contacts with a
+`phone_number` variable.
 
 ## Data about the contacts
 

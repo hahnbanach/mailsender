@@ -4,3 +4,4 @@ fastapi
 uvicorn[standard]
 requests>=2.32.5
 openai
+vonage
