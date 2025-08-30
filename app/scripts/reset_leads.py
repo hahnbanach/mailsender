@@ -3,26 +3,37 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from mailsender.db.models import Lead
+from mailsender.db.models import Contact
 from mailsender.db.session import SessionLocal
 
 
 def reset_leads() -> None:
     db = SessionLocal()
-    db.query(Lead).delete()
+    db.query(Contact).delete()
     db.commit()
-    lead = Lead(
-        email_address="mario@example.com",
-        phone_number="+390221102420",
-        opt_in="true",
-        open_called=False,
-        custom_args={"campaign_id": "sandbox_mode"},
+    contact = Contact(
+        contact_id="1",
+        business_id="dummy",
+        first="Mario",
+        last="Rossi",
+        organizations=[{"title": "", "company": "Club Di Gaming E Sport", "department": ""}],
+        emails=[{"address": "mario@example.com"}],
+        variables={
+            "address": "Via Roma 1",
+            "phone_number": "+390221102420",
+            "opt_in": "true",
+            "phonecall_made": "false",
+            "phonecall_answered": "false",
+            "sms_sent": "false",
+            "wa_sent": "false",
+            "campaign_id": "sandbox_mode",
+        },
     )
-    db.add(lead)
+    db.add(contact)
     db.commit()
     db.close()
 
 
 if __name__ == "__main__":
     reset_leads()
-    print("Lead table reset")
+    print("Contact table reset")

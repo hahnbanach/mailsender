@@ -8,7 +8,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from mailsender.config.settings import settings
-from mailsender.db.models import Lead
+from mailsender.db.models import Contact
 from mailsender.db.session import SessionLocal
 from openai import OpenAIError
 from mailsender.services import openai_client
@@ -19,70 +19,74 @@ logger = logging.getLogger(__name__)
 _PLACEHOLDER_RE = re.compile(r"{([^{}]+)}")
 
 
-def _apply_template(template: str, custom_args: dict) -> str:
+def _apply_template(template: str, variables: dict) -> str:
     def replacer(match: re.Match) -> str:
         key = match.group(1)
-        return str(custom_args.get(key, ""))
+        return str(variables.get(key, ""))
 
     return _PLACEHOLDER_RE.sub(replacer, template)
 
 
 def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
-    logger.info("Fetching leads for campaign %s", campaign_id)
+    logger.info("Fetching contacts for campaign %s", campaign_id)
     db = SessionLocal()
     try:
-        leads = (
-            db.query(Lead)
+        contacts = (
+            db.query(Contact)
             .filter(
-                Lead.custom_args["campaign_id"].as_string() == campaign_id,
-                Lead.opt_in == "true",
+                Contact.variables["campaign_id"].as_string() == campaign_id,
+                Contact.variables["opt_in"].as_string() == "true",
             )
             .all()
         )
     finally:
         db.close()
-    logger.info("Found %d leads", len(leads))
-    for lead in leads:
-        if lead.opt_in != "true":
-            logger.debug("Lead %s has opted out; skipping email", lead.email_address)
+    logger.info("Found %d contacts", len(contacts))
+    for contact in contacts:
+        variables = contact.variables or {}
+        if variables.get("opt_in") != "true":
+            logger.debug(
+                "Contact %s has opted out; skipping email",
+                contact.contact_id,
+            )
             continue
-        custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
-        if "campaign_id" in custom_args:
-            custom_args.pop("campaign_id")
         if body_ai:
             prompt = settings.email_prompt.format(
-                email_address=lead.email_address,
-                custom_args=json.dumps(custom_args, ensure_ascii=False),
+                email_address=contact.emails[0]["address"],
+                variables=json.dumps(variables, ensure_ascii=False),
             )
             logger.debug("Prompt: %s", prompt)
             try:
                 body = openai_client.generate_email(prompt)
             except OpenAIError as exc:
-                logger.error("OpenAI error for %s: %s", lead.email_address, exc)
+                logger.error(
+                    "OpenAI error for %s: %s",
+                    contact.emails[0]["address"],
+                    exc,
+                )
                 continue
             logger.debug("Generated body: %s", body)
         else:
             logger.debug("Using body template: %s", settings.body)
-            body = _apply_template(settings.body, custom_args)
+            body = _apply_template(settings.body, variables)
             logger.debug("Templated body: %s", body)
         subject = f"Campaign {campaign_id}"
         logger.debug(
             "Sending email to %s with subject %r and body %r",
-            lead.email_address,
+            contact.emails[0]["address"],
             subject,
             body,
         )
         send_email(
-            recipient=lead.email_address,
+            recipient=contact.emails[0]["address"],
             subject=subject,
             body=body,
             body_type="text/html",
             from_email=sender,
             from_name=settings.from_name,
-            custom_args={"campaign_id": campaign_id},
             sandbox_mode=(campaign_id == "sandbox_mode"),
         )
-        logger.info("Email sent to %s", lead.email_address)
+        logger.info("Email sent to %s", contact.emails[0]["address"])
 
 
 if __name__ == "__main__":
