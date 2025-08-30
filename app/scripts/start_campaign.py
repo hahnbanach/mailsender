@@ -4,7 +4,6 @@ import logging
 import os
 import re
 import sys
-
 import vonage
 from openai import OpenAIError
 
@@ -15,6 +14,7 @@ from mailsender.db.models import Contact
 from mailsender.db.session import SessionLocal
 from mailsender.services import openai_client
 from mailsender.services.sendgrid_client import send_email
+from mailsender.services.vonage_client import send_sms
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +61,6 @@ def start_campaign(
         finally:
             db.close()
         logger.info("Found %d contacts", len(contacts))
-        api_key = settings.vonage_api_key
-        api_secret = settings.vonage_api_secret
-        sms_from = settings.sms_from
-        if not all([api_key, api_secret, sms_from]):
-            logger.error("Missing Vonage configuration")
-            return
-        client = vonage.Client(key=api_key, secret=api_secret)
         for contact in contacts:
             variables = (
                 contact.variables if isinstance(contact.variables, dict) else {}
@@ -82,20 +75,11 @@ def start_campaign(
             logger.debug("Using body template: %s", settings.body)
             body = _apply_template(settings.body, context)
             logger.debug("Templated SMS body: %s", body)
-            logger.debug("Sending SMS to %s with body %r", phone_number, body)
-            response = client.sms.send_message(
-                {"from": sms_from, "to": phone_number, "text": body}
-            )
-            message = response["messages"][0]
-            status = message.get("status")
-            if status == "0":
+            try:
+                send_sms(recipient=phone_number, text=body)
                 logger.info("SMS sent to %s", phone_number)
-            else:
-                logger.error(
-                    "Error sending SMS to %s: %s",
-                    phone_number,
-                    message.get("error-text"),
-                )
+            except Exception as exc:  # pragma: no cover - log external errors
+                logger.error("Error sending SMS to %s: %s", phone_number, exc)
     elif campaign_type == "email":
         logger.info("Fetching contacts for campaign %s", campaign_id)
         db = SessionLocal()
