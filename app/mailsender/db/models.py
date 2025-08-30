@@ -1,18 +1,26 @@
-from sqlalchemy import Boolean, Column, Integer, JSON, String
+from sqlalchemy import Column, Integer, JSON, String
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
 
-class Lead(Base):
-    __tablename__ = "lead"
+class Contact(Base):
+    __tablename__ = "contact"
 
-    id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, nullable=True)
-    email_address = Column(String, unique=True, index=True, nullable=False)
-    opt_in = Column(String, default="true")
-    open_called = Column(Boolean, default=False, nullable=False)
-    custom_args = Column(JSON, default=dict)
+    contact_id = Column(String, primary_key=True, index=True)
+    business_id = Column(String, nullable=False)
+    provider = Column(String, nullable=True)
+    display_name = Column(String, nullable=True)
+    first = Column(String, nullable=True)
+    last = Column(String, nullable=True)
+    prefix = Column(String, nullable=True)
+    suffix = Column(String, nullable=True)
+    nickname = Column(String, nullable=True)
+    first_phonetic = Column(String, nullable=True)
+    organizations = Column(JSON, default=list)
+    emails = Column(JSON, default=list)
+    notes = Column(JSON, default=list)
+    variables = Column(JSON, default=dict)
 
 
 class Campaign(Base):
@@ -24,4 +32,3 @@ class Campaign(Base):
     event = Column(String, nullable=False)
     sg_message_id = Column(String, nullable=True)
     smtp_id = Column("smtp_id", String, nullable=True)
-    custom_args = Column(JSON, default=dict)

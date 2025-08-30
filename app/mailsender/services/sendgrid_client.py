@@ -16,15 +16,11 @@ def send_email(
     from_email: str = "noreply@example.com",
     from_name: str | None = None,
     body_type: str = "text/html",
-    custom_args: dict | None = None,
     sandbox_mode: bool = False,
 ) -> None:
     """Send an email using SendGrid."""
-    personalization = {"to": [{"email": recipient}]}
-    if custom_args:
-        personalization["custom_args"] = custom_args
     payload = {
-        "personalizations": [personalization],
+        "personalizations": [{"to": [{"email": recipient}]}],
         "from": {"email": from_email},
         "subject": subject,
         "tracking_settings":{"open_tracking":{"enable": True},

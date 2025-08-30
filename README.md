@@ -4,7 +4,7 @@ MrSender is a system for sending email to leads and call them soon after
 
 ## How does it work
 
-MrSender takes information about a lead and generates a message according to a prompt and the information you have about the lead. The assistant is instructed to craft simple, human-like email bodies for the lead. At the same time it creates a new contact on a MrCall phone assistant.
+MrSender takes information about a contact and generates a message according to a prompt and the information you have about the contact. The assistant is instructed to craft simple, human-like email bodies for the contact. At the same time it creates a new contact on a MrCall phone assistant.
 
 It then sends the message through sendgrid APIs. SendGrid posts events such as email opens to the `/tracking` webhook, which records them in the `campaign` table and can be used to trigger calls to MrCall.
 
@@ -17,10 +17,10 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `sendgrid_key` for sending email messages
 - `from_name` displayed as the sender name in outgoing emails
 - `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
-- `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
+- `email_prompt` instructs the assistant to generate a simple, human-style email body for the contact
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
 - `body` optional HTML template used when `--body-ai 0`; placeholders like `{name}` are
-  replaced with values from `lead.custom_args`
+  replaced with values from `contact.variables`
 
 ## Installation
 
@@ -89,14 +89,14 @@ Use `--body-ai 0` to send the `body` template from the configuration instead of
 generating content with OpenAI. Unmatched placeholders in the template are
 removed.
 
-## Data about the leads
+## Data about the contacts
 
-The data about the lead are stored in a SQLite table named `lead`. Mandatory fields are:
+The data about the contact are stored in a SQLite table named `contact`. Mandatory fields are:
 
 - `phone_number`
 - `email_address`
 - `opt_in` ("true"/"false")
-- `custom_args` (JSON)
+- `variables` (JSON)
  
 ## Campaign tracking
 
@@ -109,11 +109,7 @@ SendGrid sends POST requests to `/tracking` with payloads like:
     "timestamp": 1692981125,
     "event": "open",
     "sg_message_id": "xxx.yyy.zzz",
-    "smtp-id": "<20250825121500.12345@domain.com>",
-    "custom_args": {
-      "user_id": "42",
-      "order_id": "9876"
-    }
+    "smtp-id": "<20250825121500.12345@domain.com>"
   }
 ]
 ```
