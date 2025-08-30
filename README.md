@@ -15,6 +15,7 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 
 - `openai_key` for generating the message
 - `sendgrid_key` for sending email messages
+- `from_name` displayed as the sender name in outgoing emails
 - `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the lead
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
@@ -94,7 +95,7 @@ The data about the lead are stored in a SQLite table named `lead`. Mandatory fie
 
 - `phone_number`
 - `email_address`
-- `opt_in` (true/false)
+- `opt_in` ("true"/"false")
 - `custom_args` (JSON)
  
 ## Campaign tracking
@@ -123,7 +124,7 @@ Each object in the array is stored in the `campaign` table.
 
 MrSender offers a webservice (FastAPI)
 
-1. For each lead with opt_in == true, MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
+1. For each lead with opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
 2. Send an email to each lead through sendgrid.
 3. SendGrid posts email events to `/tracking`, storing them for further processing.
 

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def send_emails(leads: Iterable[Lead]) -> None:
     db: Session = SessionLocal()
     for lead in leads:
-        if not lead.opt_in:
+        if lead.opt_in != "true":
             logger.debug("Lead %s has opted out; skipping email", lead.id)
             continue
         custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
@@ -39,6 +39,6 @@ def send_emails(leads: Iterable[Lead]) -> None:
 
 def send_all_opt_in_leads() -> None:
     db: Session = SessionLocal()
-    leads = db.query(Lead).filter(Lead.opt_in.is_(True)).all()
+    leads = db.query(Lead).filter(Lead.opt_in == "true").all()
     db.close()
     send_emails(leads)

@@ -31,13 +31,21 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
     logger.info("Fetching leads for campaign %s", campaign_id)
     db = SessionLocal()
     try:
-        leads = db.query(Lead).filter(
-            Lead.custom_args["campaign_id"].as_string() == campaign_id
-        ).all()
+        leads = (
+            db.query(Lead)
+            .filter(
+                Lead.custom_args["campaign_id"].as_string() == campaign_id,
+                Lead.opt_in == "true",
+            )
+            .all()
+        )
     finally:
         db.close()
     logger.info("Found %d leads", len(leads))
     for lead in leads:
+        if lead.opt_in != "true":
+            logger.debug("Lead %s has opted out; skipping email", lead.email_address)
+            continue
         custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
         if "campaign_id" in custom_args:
             custom_args.pop("campaign_id")
@@ -70,7 +78,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
             body=body,
             body_type="text/html",
             from_email=sender,
-            from_name="SG Test",
+            from_name=settings.from_name,
             custom_args={"campaign_id": campaign_id},
             sandbox_mode=(campaign_id == "sandbox_mode"),
         )

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     openai_key: str = "sk-dummy"
     openai_model: str = "gpt-5-mini"
     sendgrid_key: str = "sendgrid-dummy"
+    from_name: str = "SG Test"
     mrcall_username: str = "mrcall_username"
     mrcall_password: str = "mrcall_password"
     mrcall_business_id: str = "mrcall_business"

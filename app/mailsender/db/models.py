@@ -10,7 +10,7 @@ class Lead(Base):
     id = Column(Integer, primary_key=True, index=True)
     phone_number = Column(String, nullable=True)
     email_address = Column(String, unique=True, index=True, nullable=False)
-    opt_in = Column(Boolean, default=True)
+    opt_in = Column(String, default="true")
     open_called = Column(Boolean, default=False, nullable=False)
     custom_args = Column(JSON, default=dict)
 
