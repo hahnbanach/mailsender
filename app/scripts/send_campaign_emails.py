@@ -34,7 +34,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
         contacts = (
             db.query(Contact)
             .filter(
-                Contact.custom_args["campaign_id"].as_string() == campaign_id,
+                Contact.variables["campaign_id"].as_string() == campaign_id,
                 Contact.variables["opt_in"].as_string() == "true",
             )
             .all()
@@ -51,8 +51,6 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
         custom_args = (
             contact.custom_args if isinstance(contact.custom_args, dict) else {}
         )
-        if "campaign_id" in custom_args:
-            custom_args.pop("campaign_id")
         if body_ai:
             email_address = contact.emails[0]["address"] if contact.emails else ""
             prompt = settings.email_prompt.format(
