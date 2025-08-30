@@ -14,7 +14,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Dict
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
