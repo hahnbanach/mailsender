@@ -3,7 +3,7 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from ..db.models import Lead
+from ..db.models import Contact
 from ..db.session import SessionLocal
 from ..email import email_generator, email_sender
 
@@ -11,35 +11,52 @@ from ..email import email_generator, email_sender
 logger = logging.getLogger(__name__)
 
 
-def send_emails(leads: Iterable[Lead]) -> None:
+def send_emails(contacts: Iterable[Contact]) -> None:
     db: Session = SessionLocal()
-    for lead in leads:
-        if lead.opt_in != "true":
-            logger.debug("Lead %s has opted out; skipping email", lead.id)
+    for contact in contacts:
+        variables = contact.variables or {}
+        if variables.get("opt_in") != "true":
+            logger.debug("Contact %s has opted out; skipping email", contact.contact_id)
             continue
-        logger.debug("Lead %s has opted IN; sending email", lead.id)
-        custom_args = lead.custom_args if isinstance(lead.custom_args, dict) else {}
-        if custom_args != lead.custom_args:
-            logger.debug("Lead %s has invalid custom_args: %r", lead.id, lead.custom_args)
+        logger.debug("Contact %s has opted IN; sending email", contact.contact_id)
+        custom_args = contact.custom_args if isinstance(contact.custom_args, dict) else {}
+        if custom_args != contact.custom_args:
+            logger.debug(
+                "Contact %s has invalid custom_args: %r",
+                contact.contact_id,
+                contact.custom_args,
+            )
         campaign_id = custom_args.pop("campaign_id", None)
         if campaign_id is not None:
-            logger.debug("Removed campaign_id from custom_args for lead %s", lead.id)
-        lead.custom_args = custom_args
+            logger.debug(
+                "Removed campaign_id from custom_args for contact %s",
+                contact.contact_id,
+            )
+        contact.custom_args = custom_args
+        emails = contact.emails or []
+        email_address = emails[0]["address"] if emails else None
+        if not email_address:
+            logger.debug("Contact %s has no email; skipping", contact.contact_id)
+            continue
         body = email_generator.generate_email(
-            email_address=lead.email_address,
+            email_address=email_address,
             custom_args=custom_args,
         )
         subject = f"Campaign {campaign_id}" if campaign_id else "Campaign"
         email_sender.send_generated_email(
-            recipient=lead.email_address, body=body, subject=subject
+            recipient=email_address, body=body, subject=subject
         )
-        db.add(lead)
+        db.add(contact)
     db.commit()
     db.close()
 
 
-def send_all_opt_in_leads() -> None:
+def send_all_opt_in_contacts() -> None:
     db: Session = SessionLocal()
-    leads = db.query(Lead).filter(Lead.opt_in == "true").all()
+    contacts = (
+        db.query(Contact)
+        .filter(Contact.variables["opt_in"].as_string() == "true")
+        .all()
+    )
     db.close()
-    send_emails(leads)
+    send_emails(contacts)
