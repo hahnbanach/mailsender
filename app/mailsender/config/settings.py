@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     vonage_api_key: str = ""
     vonage_api_secret: str = ""
     sms_from: str = "MRSENDER"
+    vonage_webhook: str = "https://example.org/example"
     mrcall_username: str = "mrcall_username"
     mrcall_password: str = "mrcall_password"
     mrcall_business_id: str = "mrcall_business"
