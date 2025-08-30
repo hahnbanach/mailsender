@@ -75,7 +75,7 @@ def start_campaign(
             body = _apply_template(settings.body, context)
             logger.debug("Templated SMS body: %s", body)
             try:
-                send_sms(recipient=phone_number, text=body)
+                send_sms(recipient=phone_number, text=body, campaign_id=campaign_id)
                 logger.info("SMS sent to %s", phone_number)
             except Exception as exc:  # pragma: no cover - log external errors
                 logger.error("Error sending SMS to %s: %s", phone_number, exc)
