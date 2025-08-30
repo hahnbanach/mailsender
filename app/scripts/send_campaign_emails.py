@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 _PLACEHOLDER_RE = re.compile(r"{([^{}]+)}")
 
 
-def _apply_template(template: str, custom_args: dict) -> str:
+def _apply_template(template: str, variables: dict) -> str:
     def replacer(match: re.Match) -> str:
         key = match.group(1)
-        return str(custom_args.get(key, ""))
+        return str(variables.get(key, ""))
 
     return _PLACEHOLDER_RE.sub(replacer, template)
 
@@ -48,14 +48,14 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
                 "Contact %s has opted out; skipping email", contact.emails[0]["address"]
             )
             continue
-        custom_args = (
-            contact.custom_args if isinstance(contact.custom_args, dict) else {}
+        variables = (
+            contact.variables if isinstance(contact.variables, dict) else {}
         )
         if body_ai:
             email_address = contact.emails[0]["address"] if contact.emails else ""
             prompt = settings.email_prompt.format(
                 email_address=email_address,
-                custom_args=json.dumps(custom_args, ensure_ascii=False),
+                variables=json.dumps(variables, ensure_ascii=False),
             )
             logger.debug("Prompt: %s", prompt)
             try:
@@ -66,7 +66,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
             logger.debug("Generated body: %s", body)
         else:
             logger.debug("Using body template: %s", settings.body)
-            body = _apply_template(settings.body, custom_args)
+            body = _apply_template(settings.body, variables)
             logger.debug("Templated body: %s", body)
         subject = f"Campaign {campaign_id}"
         email_address = contact.emails[0]["address"] if contact.emails else ""
@@ -83,7 +83,7 @@ def send_campaign_emails(campaign_id: str, sender: str, body_ai: int) -> None:
             body_type="text/html",
             from_email=sender,
             from_name=settings.from_name,
-            custom_args={"campaign_id": campaign_id},
+            variables={"campaign_id": campaign_id},
             sandbox_mode=(campaign_id == "sandbox_mode"),
         )
         logger.info("Email sent to %s", email_address)

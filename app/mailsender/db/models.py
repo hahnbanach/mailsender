@@ -14,7 +14,6 @@ class Contact(Base):
     organizations = Column(JSON, default=list)
     emails = Column(JSON, default=list)
     variables = Column(JSON, default=dict)
-    custom_args = Column(JSON, default=dict)
 
 
 class Campaign(Base):

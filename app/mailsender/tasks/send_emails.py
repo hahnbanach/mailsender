@@ -18,23 +18,20 @@ def send_emails(contacts: Iterable[Contact]) -> None:
             logger.debug("Contact %s has opted out; skipping email", contact.id)
             continue
         logger.debug("Contact %s has opted IN; sending email", contact.id)
-        custom_args = (
-            contact.custom_args if isinstance(contact.custom_args, dict) else {}
+        variables = (
+            contact.variables if isinstance(contact.variables, dict) else {}
         )
-        if custom_args != contact.custom_args:
-            logger.debug(
-                "Contact %s has invalid custom_args: %r", contact.id, contact.custom_args
+        if variables != contact.variables:
+            logger.warning(
+                "Contact %s has invalid variables: %r", contact.id, contact.variables
             )
-        campaign_id = custom_args.pop("campaign_id", None)
-        if campaign_id is not None:
-            logger.debug(
-                "Removed campaign_id from custom_args for contact %s", contact.id
-            )
-        contact.custom_args = custom_args
+        campaign_id = variables.pop("campaign_id", None)
+        # remove campaign_id from contact variables
+        contact.variables = variables 
         email_address = contact.emails[0]["address"] if contact.emails else ""
         body = email_generator.generate_email(
             email_address=email_address,
-            custom_args=custom_args,
+            variables=variables,
         )
         subject = f"Campaign {campaign_id}" if campaign_id else "Campaign"
         email_sender.send_generated_email(
