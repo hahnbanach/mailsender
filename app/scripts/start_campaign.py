@@ -4,7 +4,6 @@ import logging
 import os
 import re
 import sys
-import vonage
 from openai import OpenAIError
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))

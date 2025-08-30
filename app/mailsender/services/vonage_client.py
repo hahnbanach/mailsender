@@ -1,5 +1,6 @@
 import logging
-import vonage
+from vonage import Auth, Vonage
+from vonage_sms import SmsMessage
 
 from ..config.settings import settings
 
@@ -13,12 +14,17 @@ def send_sms(recipient: str, text: str, *, sender: str | None = None) -> None:
     from_name = sender or settings.sms_from
     if not from_name:
         raise ValueError("Missing SMS sender")
-    client = vonage.Client(key=settings.vonage_api_key, secret=settings.vonage_api_secret)
-    payload = {"from": from_name, "to": recipient, "text": text}
-    logger.debug("Vonage SMS request: %s", payload)
-    response = client.sms.send_message(payload)
-    logger.debug("Vonage SMS response: %s", response)
-    message = response["messages"][0]
-    status = message.get("status")
-    if status != "0":
-        raise RuntimeError(message.get("error-text"))
+
+    auth = Auth(
+        api_key=settings.vonage_api_key,
+        api_secret=settings.vonage_api_secret,
+    )
+    client = Vonage(auth=auth)
+    message = SmsMessage(to=recipient, from_=from_name, text=text)
+    logger.debug("Vonage SMS request: %s", message.model_dump(exclude_unset=True))
+    response = client.sms.send(message)
+    logger.debug("Vonage SMS response: %s", response.model_dump(exclude_unset=True))
+
+    msg = response.messages[0]
+    if msg.status != "0":
+        raise RuntimeError(msg.error_text)
