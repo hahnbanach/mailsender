@@ -1,5 +1,6 @@
 import logging
-from fastapi import Depends, FastAPI, Request
+from json import JSONDecodeError
+from fastapi import Depends, FastAPI, Request, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -89,16 +90,20 @@ def sms_tracking(
 ) -> Dict[str, str]:
     logger.debug("Vonage DLR: %s", dict(request.query_params))
     if status == "delivered":
-        contact = (
-            db.query(Contact)
-            .filter(
-                or_(
-                    Contact.variables["phone_number"].as_string() == msisdn,
-                    Contact.variables["phone_number"].as_string() == f"+{msisdn}",
+        try:
+            contact = (
+                db.query(Contact)
+                .filter(
+                    or_(
+                        Contact.variables["phone_number"].as_string() == msisdn,
+                        Contact.variables["phone_number"].as_string() == f"+{msisdn}",
+                    )
                 )
+                .first()
             )
-            .first()
-        )
+        except JSONDecodeError as exc:
+            logger.error("Malformed contact data for msisdn %s: %s", msisdn, exc)
+            raise HTTPException(status_code=400, detail="Malformed contact data")
         if contact:
             variables = contact.variables or {}
             variables["sms_delivered"] = "true"
