@@ -102,7 +102,7 @@ def sms_tracking(
         if contact:
             variables = contact.variables or {}
             variables["sms_delivered"] = "true"
-            if variables.get("phonecall_made") == "false":
+            if variables.get("phonecall_made") != "true":
                 phone_number = variables.get("phone_number")
                 if phone_number:
                     start_call(phone_number)

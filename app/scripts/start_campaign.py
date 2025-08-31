@@ -57,28 +57,32 @@ def start_campaign(
                 )
                 .all()
             )
+            logger.info("Found %d contacts", len(contacts))
+            for contact in contacts:
+                variables = (
+                    contact.variables if isinstance(contact.variables, dict) else {}
+                )
+                phone_number = variables.get("phone_number")
+                if not phone_number:
+                    logger.debug(
+                        "Contact %s missing phone number; skipping SMS", contact.id
+                    )
+                    continue
+                context = {"contact": contact}
+                logger.debug("Using body template: %s", settings.body)
+                body = _apply_template(settings.body, context)
+                logger.debug("Templated SMS body: %s", body)
+                try:
+                    send_sms(recipient=phone_number, text=body, campaign_id=campaign_id)
+                    logger.info("SMS sent to %s", phone_number)
+                    variables["sms_sent"] = "true"
+                    contact.variables = variables
+                    db.commit()
+                except Exception as exc:  # pragma: no cover - log external errors
+                    logger.error("Error sending SMS to %s: %s", phone_number, exc)
+                    db.rollback()
         finally:
             db.close()
-        logger.info("Found %d contacts", len(contacts))
-        for contact in contacts:
-            variables = (
-                contact.variables if isinstance(contact.variables, dict) else {}
-            )
-            phone_number = variables.get("phone_number")
-            if not phone_number:
-                logger.debug(
-                    "Contact %s missing phone number; skipping SMS", contact.id
-                )
-                continue
-            context = {"contact": contact}
-            logger.debug("Using body template: %s", settings.body)
-            body = _apply_template(settings.body, context)
-            logger.debug("Templated SMS body: %s", body)
-            try:
-                send_sms(recipient=phone_number, text=body, campaign_id=campaign_id)
-                logger.info("SMS sent to %s", phone_number)
-            except Exception as exc:  # pragma: no cover - log external errors
-                logger.error("Error sending SMS to %s: %s", phone_number, exc)
     elif campaign_type == "email":
         logger.info("Fetching contacts for campaign %s", campaign_id)
         db = SessionLocal()
