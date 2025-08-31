@@ -89,6 +89,7 @@ def start_campaign(
                     variables["sms_sent"] = "true"
                     contact.variables = variables
                     db.commit()
+                    logger.info("Updated contact %s sms_sent=true", contact.id)
                 except Exception as exc:  # pragma: no cover - log external errors
                     logger.error("Error sending SMS to %s: %s", phone_number, exc)
                     db.rollback()

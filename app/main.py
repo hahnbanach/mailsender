@@ -13,7 +13,10 @@ def _configure_logging(level: str | None) -> str:
     """Configure the root logger and return the effective level."""
     if level:
         level = level.lower()
-        logging.basicConfig(level=getattr(logging, level.upper(), logging.INFO))
+        logging.basicConfig(
+            level=getattr(logging, level.upper(), logging.INFO), force=True
+        )
+        logging.getLogger().setLevel(getattr(logging, level.upper(), logging.INFO))
         return level
     return "info"
 
