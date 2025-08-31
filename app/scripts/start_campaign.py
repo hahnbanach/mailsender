@@ -5,6 +5,8 @@ import os
 import re
 import sys
 from openai import OpenAIError
+from sqlalchemy import func
+from sqlalchemy.orm import load_only
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -45,12 +47,21 @@ def _apply_template(template: str, context: dict) -> str:
 def start_campaign(
     campaign_id: str, sender: str, body_ai: int, campaign_type: str = "email",
 ) -> None:
+    logger.debug("Connecting to database: %s", settings.database_url)
+    db = SessionLocal()
+    try:
+        total_contacts = db.query(func.count(Contact.id)).scalar()
+        logger.debug("Database contains %d contacts", total_contacts)
+    finally:
+        db.close()
+
     if campaign_type == "sms":
         logger.info("Fetching contacts for campaign %s", campaign_id)
         db = SessionLocal()
         try:
             contacts = (
                 db.query(Contact)
+                .options(load_only(Contact.id, Contact.first, Contact.last, Contact.variables))
                 .filter(
                     Contact.variables["campaign_id"].as_string() == campaign_id,
                     Contact.variables["opt_in"].as_string() == "true",
@@ -89,6 +100,15 @@ def start_campaign(
         try:
             contacts = (
                 db.query(Contact)
+                .options(
+                    load_only(
+                        Contact.id,
+                        Contact.first,
+                        Contact.last,
+                        Contact.variables,
+                        Contact.emails,
+                    )
+                )
                 .filter(
                     Contact.variables["campaign_id"].as_string() == campaign_id,
                     Contact.variables["opt_in"].as_string() == "true",
