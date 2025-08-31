@@ -67,6 +67,10 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
                     start_call(phone_number)
                     variables["phonecall_made"] = "true"
                     contact.variables = variables
+                    db.commit()
+                    logger.info(
+                        "Updated contact %s phonecall_made=true", contact.id
+                    )
         elif event.event == "unsubscribe":
             contact = (
                 db.query(Contact)
@@ -77,6 +81,8 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
                 variables = contact.variables or {}
                 variables["opt_in"] = "false"
                 contact.variables = variables
+                db.commit()
+                logger.info("Updated contact %s opt_in=false", contact.id)
     db.commit()
     return {"status": "ok"}
 
@@ -114,4 +120,9 @@ def sms_tracking(
                     variables["phonecall_made"] = "true"
             contact.variables = variables
             db.commit()
+            logger.info(
+                "Updated contact %s sms_delivered=true, phonecall_made=%s",
+                contact.id,
+                variables.get("phonecall_made"),
+            )
     return {"status": "ok"}

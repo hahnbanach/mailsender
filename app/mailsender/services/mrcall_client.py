@@ -18,8 +18,8 @@ def start_call(phone_number: str) -> dict:
         "Content-Type": "application/json",
     }
     payload = {"toNumber": phone_number}
-    logger.debug("MrCall request: %s", payload)
+    logger.info("MrCall request: %s", payload)
     response = requests.post(MR_CALL_URL, json=payload, headers=headers, timeout=10)
-    logger.debug("MrCall response %s: %s", response.status_code, response.text)
+    logger.info("MrCall response %s: %s", response.status_code, response.text)
     response.raise_for_status()
     return response.json()
