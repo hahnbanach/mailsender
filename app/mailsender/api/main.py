@@ -105,6 +105,7 @@ def sms_tracking(
                         Contact.variables["phone_number"].as_string() == f"+{msisdn}",
                     )
                 )
+                .with_for_update()
                 .first()
             )
         except JSONDecodeError as exc:
@@ -113,16 +114,22 @@ def sms_tracking(
         if contact:
             variables = contact.variables or {}
             variables["sms_delivered"] = "true"
-            if variables.get("phonecall_made") != "true":
-                phone_number = variables.get("phone_number")
-                if phone_number:
-                    start_call(phone_number)
-                    variables["phonecall_made"] = "true"
-            contact.variables = variables
-            db.commit()
-            logger.info(
-                "Updated contact %s sms_delivered=true, phonecall_made=%s",
-                contact.id,
-                variables.get("phonecall_made"),
-            )
+            phone_number = variables.get("phone_number")
+            if variables.get("phonecall_made") != "true" and phone_number:
+                variables["phonecall_made"] = "true"
+                contact.variables = variables
+                db.commit()
+                logger.info(
+                    "Updated contact %s sms_delivered=true, phonecall_made=true",
+                    contact.id,
+                )
+                start_call(phone_number)
+            else:
+                contact.variables = variables
+                db.commit()
+                logger.info(
+                    "Updated contact %s sms_delivered=true, phonecall_made=%s",
+                    contact.id,
+                    variables.get("phonecall_made"),
+                )
     return {"status": "ok"}
