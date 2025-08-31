@@ -1,11 +1,14 @@
 import asyncio
 import logging
+import time
 from json import JSONDecodeError
-from fastapi import Depends, FastAPI, Request, HTTPException
+from typing import Dict, List, Optional
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import or_
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
-from typing import Dict, Optional, List
 
 from ..db.models import Campaign, Contact
 from ..db.session import SessionLocal
@@ -94,6 +97,18 @@ async def _delayed_start_call(phone_number: str) -> None:
     await asyncio.to_thread(start_call, phone_number)
 
 
+def _commit_with_retry(db: Session, retries: int = 3) -> None:
+    for attempt in range(retries):
+        try:
+            db.commit()
+            return
+        except OperationalError:
+            db.rollback()
+            if attempt == retries - 1:
+                raise
+            time.sleep(0.1)
+
+
 @app.get("/sms_tracking")
 async def sms_tracking(
     request: Request,
@@ -111,9 +126,7 @@ async def sms_tracking(
                         Contact.variables["phone_number"].as_string() == msisdn,
                         Contact.variables["phone_number"].as_string() == f"+{msisdn}",
                     )
-                )
-                .with_for_update()
-                .first()
+                ).first()
             )
         except JSONDecodeError as exc:
             logger.error("Malformed contact data for msisdn %s: %s", msisdn, exc)
@@ -125,7 +138,7 @@ async def sms_tracking(
             if variables.get("phonecall_made") != "true" and phone_number:
                 variables["phonecall_made"] = "true"
                 contact.variables = variables
-                db.commit()
+                _commit_with_retry(db)
                 logger.info(
                     "Updated contact %s sms_delivered=true, phonecall_made=true",
                     contact.id,
@@ -133,7 +146,7 @@ async def sms_tracking(
                 asyncio.create_task(_delayed_start_call(phone_number))
             else:
                 contact.variables = variables
-                db.commit()
+                _commit_with_retry(db)
                 logger.info(
                     "Updated contact %s sms_delivered=true, phonecall_made=%s",
                     contact.id,
