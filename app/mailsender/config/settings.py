@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./mailsender.db"
     body_email: str = ""
     body_sms: str = ""
+    send_email_delay_sec: int = 0
 
 def _load_from_ini() -> Dict[str, str]:
     """Load configuration values from ``app/resources/settings.ini``."""
