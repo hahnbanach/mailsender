@@ -70,9 +70,7 @@ def start_campaign(
             )
             logger.info("Found %d contacts", len(contacts))
             for contact in contacts:
-                variables = (
-                    contact.variables if isinstance(contact.variables, dict) else {}
-                )
+                variables = dict(contact.variables or {})
                 phone_number = variables.get("phone_number")
                 if not phone_number:
                     logger.debug(
@@ -125,9 +123,7 @@ def start_campaign(
                     "Contact %s has opted out; skipping email", contact.emails[0]["address"]
                 )
                 continue
-            variables = (
-                contact.variables if isinstance(contact.variables, dict) else {}
-            )
+            variables = dict(contact.variables or {})
             context = {"contact": contact}
             if body_ai:
                 email_address = contact.emails[0]["address"] if contact.emails else ""
