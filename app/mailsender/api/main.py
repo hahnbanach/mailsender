@@ -1,6 +1,7 @@
 import logging
 from fastapi import Depends, FastAPI, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List
 
@@ -76,4 +77,36 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
                 variables["opt_in"] = "false"
                 contact.variables = variables
     db.commit()
+    return {"status": "ok"}
+
+
+@app.get("/sms_tracking")
+def sms_tracking(
+    request: Request,
+    status: str,
+    msisdn: str,
+    db: Session = Depends(get_db),
+) -> Dict[str, str]:
+    logger.debug("Vonage DLR: %s", dict(request.query_params))
+    if status == "delivered":
+        contact = (
+            db.query(Contact)
+            .filter(
+                or_(
+                    Contact.variables["phone_number"].as_string() == msisdn,
+                    Contact.variables["phone_number"].as_string() == f"+{msisdn}",
+                )
+            )
+            .first()
+        )
+        if contact:
+            variables = contact.variables or {}
+            variables["sms_delivered"] = "true"
+            if variables.get("phonecall_made") == "false":
+                phone_number = variables.get("phone_number")
+                if phone_number:
+                    start_call(phone_number)
+                    variables["phonecall_made"] = "true"
+            contact.variables = variables
+            db.commit()
     return {"status": "ok"}
