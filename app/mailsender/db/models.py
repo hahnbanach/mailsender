@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, JSON, String
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -13,7 +14,7 @@ class Contact(Base):
     last = Column(String, nullable=True)
     organizations = Column(JSON, default=list)
     emails = Column(JSON, default=list)
-    variables = Column(JSON, default=dict)
+    variables = Column(MutableDict.as_mutable(JSON()), default=dict)
 
 
 class Campaign(Base):
