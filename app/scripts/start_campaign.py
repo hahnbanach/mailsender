@@ -78,9 +78,22 @@ def start_campaign(
                     )
                     continue
                 context = {"contact": contact}
-                logger.debug("Using body template: %s", settings.body)
-                body = _apply_template(settings.body, context)
-                logger.debug("Templated SMS body: %s", body)
+                if body_ai:
+                    prompt = settings.prompt_sms.format(
+                        phone_number=phone_number,
+                        variables=json.dumps(variables, ensure_ascii=False),
+                    )
+                    logger.debug("Prompt: %s", prompt)
+                    try:
+                        body = openai_client.generate_email(prompt)
+                    except OpenAIError as exc:
+                        logger.error("OpenAI error for %s: %s", phone_number, exc)
+                        continue
+                    logger.debug("Generated SMS body: %s", body)
+                else:
+                    logger.debug("Using body template: %s", settings.body_sms)
+                    body = _apply_template(settings.body_sms, context)
+                    logger.debug("Templated SMS body: %s", body)
                 try:
                     send_sms(recipient=phone_number, text=body, campaign_id=campaign_id)
                     logger.info("SMS sent to %s", phone_number)
@@ -139,8 +152,8 @@ def start_campaign(
                     continue
                 logger.debug("Generated body: %s", body)
             else:
-                logger.debug("Using body template: %s", settings.body)
-                body = _apply_template(settings.body, context)
+                logger.debug("Using body template: %s", settings.body_email)
+                body = _apply_template(settings.body_email, context)
                 logger.debug("Templated body: %s", body)
             subject = f"Campaign {campaign_id}"
             email_address = contact.emails[0]["address"] if contact.emails else ""
