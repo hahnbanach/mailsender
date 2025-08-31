@@ -33,13 +33,13 @@ class Settings(BaseSettings):
         "Sei un assistente che scrive email molto semplici e naturali. "
         "Crea il corpo della mail per {email_address} usando i dati del contatto: {variables}"
     )
-    prompt_sms: str = (
+    sms_prompt: str = (
         "Sei un assistente che scrive SMS molto semplici e naturali. "
         "Crea il messaggio SMS per {phone_number} usando i dati del contatto: {variables}"
     )
     database_url: str = "sqlite:///./mailsender.db"
-    body_email: str = ""
-    body_sms: str = ""
+    email_body: str = ""
+    sms_body: str = ""
     send_email_delay_sec: int = 0
 
 def _load_from_ini() -> Dict[str, str]:
@@ -51,7 +51,7 @@ def _load_from_ini() -> Dict[str, str]:
         parser.read(candidate)
         if parser.has_section("settings"):
             for k, v in parser.items("settings"):
-                if not v and k not in {"body_email", "body_sms"}:
+                if not v and k not in {"email_body", "sms_body"}:
                     continue
                 if k == "database_url" and v.startswith("sqlite:///"):
                     db_path = v.replace("sqlite:///", "")

@@ -79,7 +79,7 @@ def start_campaign(
                     continue
                 context = {"contact": contact}
                 if body_ai:
-                    prompt = settings.prompt_sms.format(
+                    prompt = settings.sms_prompt.format(
                         phone_number=phone_number,
                         variables=json.dumps(variables, ensure_ascii=False),
                     )
@@ -91,8 +91,8 @@ def start_campaign(
                         continue
                     logger.debug("Generated SMS body: %s", body)
                 else:
-                    logger.debug("Using body template: %s", settings.body_sms)
-                    body = _apply_template(settings.body_sms, context)
+                    logger.debug("Using body template: %s", settings.sms_body)
+                    body = _apply_template(settings.sms_body, context)
                     logger.debug("Templated SMS body: %s", body)
                 try:
                     send_sms(recipient=phone_number, text=body, campaign_id=campaign_id)
@@ -152,8 +152,8 @@ def start_campaign(
                     continue
                 logger.debug("Generated body: %s", body)
             else:
-                logger.debug("Using body template: %s", settings.body_email)
-                body = _apply_template(settings.body_email, context)
+                logger.debug("Using body template: %s", settings.email_body)
+                body = _apply_template(settings.email_body, context)
                 logger.debug("Templated body: %s", body)
             subject = f"Campaign {campaign_id}"
             email_address = contact.emails[0]["address"] if contact.emails else ""
