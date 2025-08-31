@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from json import JSONDecodeError
 from fastapi import Depends, FastAPI, Request, HTTPException
@@ -9,6 +10,7 @@ from typing import Dict, Optional, List
 from ..db.models import Campaign, Contact
 from ..db.session import SessionLocal
 from ..services.mrcall_client import start_call
+from ..config.settings import settings
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
@@ -87,8 +89,13 @@ def tracking(events: List[TrackingEvent], db: Session = Depends(get_db)) -> Dict
     return {"status": "ok"}
 
 
+async def _delayed_start_call(phone_number: str) -> None:
+    await asyncio.sleep(settings.send_email_delay_sec)
+    await asyncio.to_thread(start_call, phone_number)
+
+
 @app.get("/sms_tracking")
-def sms_tracking(
+async def sms_tracking(
     request: Request,
     status: str,
     msisdn: str,
@@ -123,7 +130,7 @@ def sms_tracking(
                     "Updated contact %s sms_delivered=true, phonecall_made=true",
                     contact.id,
                 )
-                start_call(phone_number)
+                asyncio.create_task(_delayed_start_call(phone_number))
             else:
                 contact.variables = variables
                 db.commit()
