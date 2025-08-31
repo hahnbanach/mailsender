@@ -20,10 +20,13 @@ Configuration values are read from `app/resources/settings.ini`. Populate the
 - `sms_from` displayed as the sender name in outgoing SMS
 - `mrcall_username`, `mrcall_password` and `mrcall_business_id` for making the calls
 - `email_prompt` instructs the assistant to generate a simple, human-style email body for the contact
+- `prompt_sms` instructs the assistant to generate a simple, human-style SMS message for the contact
 - `database_url` pointing to the SQLite database (default is `sqlite:///./mailsender.db`)
-- `body` optional HTML template used when `--body-ai 0`; placeholders like
+- `body_email` optional HTML template used for emails when `--body-ai 0`; placeholders like
   `{contact.first}` or `{contact.variables.phone_number}` are replaced with
   values from the corresponding contact fields
+- `body_sms` optional text template used for SMS when `--body-ai 0`; placeholders
+  follow the same `{}` syntax
 
 ## Installation
 
@@ -88,11 +91,11 @@ PYTHONPATH=app uvicorn main:app --reload --log-level debug
 python app/scripts/start_campaign.py --id campaign_id --sender you@example.com [--body-ai 0|1] [--ctype email|sms]
 ```
 
-Use `--body-ai 0` to send the `body` template from the configuration instead of
-generating content with OpenAI. Placeholders such as `{contact.first}` or
-`{contact.variables.phone_number}` are replaced with the corresponding contact
-fields. Use `--ctype sms` to send SMS messages through Vonage to contacts with a
-`phone_number` variable.
+Use `--body-ai 0` to send the configured template (`body_email` or `body_sms`)
+instead of generating content with OpenAI. Placeholders such as
+`{contact.first}` or `{contact.variables.phone_number}` are replaced with the
+corresponding contact fields. Use `--ctype sms` to send SMS messages through
+Vonage to contacts with a `phone_number` variable.
 
 ## Data about the contacts
 
