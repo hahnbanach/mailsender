@@ -25,7 +25,13 @@ def test_sms_tracking_single_call(tmp_path):
     logger.debug("creating database at %s", db_url)
     engine = create_engine(db_url, connect_args={"check_same_thread": False}, future=True)
     Contact.__table__.columns["variables"].type = MutableDict.as_mutable(JSON())
-    TestingSessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)
+    TestingSessionLocal = sessionmaker(
+        bind=engine,
+        autocommit=False,
+        autoflush=False,
+        future=True,
+        expire_on_commit=False,
+    )
     Base.metadata.create_all(bind=engine)
 
     def override_get_db():
