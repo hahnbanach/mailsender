@@ -135,9 +135,9 @@ Each object in the array is stored in the `campaign` table.
 
 MrSender offers a webservice (FastAPI)
 
-1. For each contact with opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
-2. Send an email to each contact through sendgrid.
-3. SendGrid posts email events to `/tracking`, storing them for further processing.
+1. For each contact with variables.opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
+2. MrSender will then send an email to each contact through sendgrid.
+3. SendGrid will post email events to `/tracking`, storing them for further processing.
 
 ## Testing
 
