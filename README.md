@@ -131,6 +131,19 @@ SendGrid sends POST requests to `/tracking` with payloads like:
 
 Each object in the array is stored in the `campaign` table.
 
+When an `open` event is received, the service looks up the related contact by
+matching the email address in the payload with the first email address stored
+for the contact. If the contact has a `variables.phone_number` value and no
+phone call has been triggered yet (`variables.phonecall_made != "true"`), the
+service immediately marks `phonecall_made` as `true`, persists the change, and
+invokes the MrCall API to place an outbound call to that phone number. The call
+is sent via `POST https://api.mrcall.ai/mrcall/v1/atom/{business_id}/outbound`
+using HTTP basic authentication with the configured MrCall credentials.
+
+`unsubscribe` events are also processed: the matching contact gets its
+`variables.opt_in` flag set to `"false"` so that future campaigns skip the
+recipient.
+
 ## Workflow details
 
 MrSender offers a webservice (FastAPI)
@@ -138,6 +151,10 @@ MrSender offers a webservice (FastAPI)
 1. For each contact with variables.opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
 2. MrSender will then send an email to each contact through sendgrid.
 3. SendGrid will post email events to `/tracking`, storing them for further processing.
+4. For `open` events, MrSender records the campaign activity, marks the contact
+   as called, and requests MrCall to dial the saved phone number. `unsubscribe`
+   events update the contact so that future campaigns respect the recipient's
+   preferences.
 
 ## Testing
 
