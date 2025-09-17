@@ -54,6 +54,12 @@ python app/scripts/create_campaign_table.py
 python app/scripts/reset_contacts.py
 ```
 
+### Setup the webook URLs
+
+Configure Sendgrid to send webhook to MrSender's URL (Sendgrid page -> Settings -> Mail settings).
+
+Configure Nexmo/Vonage in settings.ini (we set the webhook in the call)
+
 ### Run the API
 
 Start the API server from the repository root:
@@ -109,9 +115,7 @@ The data about the contact are stored in a SQLite table named `contact`. Mandato
 - `variables` (JSON containing keys like `address`, `phone_number`, `opt_in`, `phonecall_made`, `phonecall_answered`, `sms_sent`, `wa_sent`)
 - `custom_args` (JSON)
  
-## Campaign tracking
-
-Configure Sendgrid to send webhook to MrSender's URL (Sendgrid page -> Settings -> Mail settings).
+## Email tracking
 
 SendGrid sends POST requests to `example-webhook.org/tracking` with payloads like:
 
@@ -145,6 +149,10 @@ using HTTP basic authentication with the configured MrCall credentials.
 `unsubscribe` events are also processed: the matching contact gets its
 `variables.opt_in` flag set to `"false"` so that future campaigns skip the
 recipient.
+
+## SMS Tracking
+
+TODO
 
 ## Workflow details
 
