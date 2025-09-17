@@ -111,7 +111,9 @@ The data about the contact are stored in a SQLite table named `contact`. Mandato
  
 ## Campaign tracking
 
-SendGrid sends POST requests to `/tracking` with payloads like:
+Configure Sendgrid to send webhook to MrSender's URL (Sendgrid page -> Settings -> Mail settings).
+
+SendGrid sends POST requests to `example-webhook.org/tracking` with payloads like:
 
 ```
 [
