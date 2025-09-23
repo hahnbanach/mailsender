@@ -45,7 +45,6 @@ def _log_call_details(
     request: Request,
     response,
     request_body: bytes,
-    duration_ms: float,
     error: Exception | None,
 ):
     client = request.client
@@ -66,7 +65,6 @@ def _log_call_details(
         request_headers,
         request_body_preview,
         status_code,
-        duration_ms,
         response_headers,
         error_suffix,
     )
@@ -85,8 +83,7 @@ async def log_requests(request: Request, call_next):
         error = exc
         raise
     finally:
-        duration_ms = (time.perf_counter() - start) * 1000
-        _log_call_details(request, response, request_body, duration_ms, error)
+        _log_call_details(request, response, request_body, error)
 
 
 class TrackingEvent(BaseModel):

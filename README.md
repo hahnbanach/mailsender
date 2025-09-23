@@ -8,6 +8,18 @@ MrSender takes information about a contact and generates a message according to 
 
 It then sends the message through sendgrid APIs. SendGrid posts events such as email opens to the `/tracking` webhook, which records them in the `campaign` table and can be used to trigger calls to MrCall.
 
+## TLDR
+
+MrSender offers a webservice (FastAPI)
+
+1. For each contact with variables.opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
+2. MrSender will then send an email to each contact through sendgrid.
+3. SendGrid will post email events to `/tracking`, storing them for further processing.
+4. For `open` events, MrSender records the campaign activity, marks the contact
+   as called, and requests MrCall to dial the saved phone number. `unsubscribe`
+   events update the contact so that future campaigns respect the recipient's
+   preferences.
+
 ## Configuration
 
 Configuration values are read from `app/resources/settings.ini`. Populate the
@@ -62,43 +74,13 @@ Configure Nexmo/Vonage in settings.ini (we set the webhook in the call)
 
 ### Run the API
 
-Start the API server from the repository root:
+Start the API server from the repository root, eg one of the three:
 
 ```
 python app/main.py --debug
-```
-
-The launcher reports which verbosity levels are active; with `--debug` you
-should see both of the following messages:
-
-```
-INFO: info messages enabled
-DEBUG: debug messages enabled
-```
-
-Use `--debug` for verbose output or set the `LOG_LEVEL` environment
-variable to another level:
-
-```
-LOG_LEVEL=warning python app/main.py
-```
-
-When the API runs at DEBUG level it records every request with the method,
-path, query parameters, redacted headers, and a truncated preview of the
-payload together with the response status and latency. Use this mode during
-integration testing to confirm what the service received and returned.
-
-Alternatively, run `uvicorn` directly with auto-reload when you need a
-debugging workflow:
-
-```
+LOG_LEVEL=debug python app/main.py
 uvicorn app.main:app --reload --log-level debug
 ```
-
-The application entrypoint now ensures the `mailsender` package is always on
-`PYTHONPATH`, so the command above works without extra environment
-configuration. Use the `LOG_LEVEL` environment variable to adjust verbosity
-when running under Docker or other process managers.
 
 ### Start a campaign
 
@@ -163,22 +145,3 @@ recipient.
 
 TODO
 
-## Workflow details
-
-MrSender offers a webservice (FastAPI)
-
-1. For each contact with variables.opt_in == "true", MrSender generates a personalized email using the prompt stored in EMAIL_PROMPT.
-2. MrSender will then send an email to each contact through sendgrid.
-3. SendGrid will post email events to `/tracking`, storing them for further processing.
-4. For `open` events, MrSender records the campaign activity, marks the contact
-   as called, and requests MrCall to dial the saved phone number. `unsubscribe`
-   events update the contact so that future campaigns respect the recipient's
-   preferences.
-
-## Testing
-
-Run a syntax check across all Python modules:
-
-```
-python -m py_compile $(git ls-files '*.py')
-```
