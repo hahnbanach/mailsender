@@ -68,6 +68,14 @@ Start the API server from the repository root:
 python app/main.py --debug
 ```
 
+The launcher reports which verbosity levels are active; with `--debug` you
+should see both of the following messages:
+
+```
+INFO: info messages enabled
+DEBUG: debug messages enabled
+```
+
 Use `--debug` for verbose output or set the `LOG_LEVEL` environment
 variable to another level:
 
@@ -75,21 +83,22 @@ variable to another level:
 LOG_LEVEL=warning python app/main.py
 ```
 
-Alternatively, run `uvicorn` directly and control verbosity with its
-`--log-level` flag:
+When the API runs at DEBUG level it records every request with the method,
+path, query parameters, redacted headers, and a truncated preview of the
+payload together with the response status and latency. Use this mode during
+integration testing to confirm what the service received and returned.
+
+Alternatively, run `uvicorn` directly with auto-reload when you need a
+debugging workflow:
 
 ```
 uvicorn app.main:app --reload --log-level debug
 ```
 
-Use `--debug` for verbose output or set the `LOG_LEVEL` environment
-variable to another level:
-
-```
-cd app && uvicorn main:app --reload --log-level debug
-# or
-PYTHONPATH=app uvicorn main:app --reload --log-level debug
-```
+The application entrypoint now ensures the `mailsender` package is always on
+`PYTHONPATH`, so the command above works without extra environment
+configuration. Use the `LOG_LEVEL` environment variable to adjust verbosity
+when running under Docker or other process managers.
 
 ### Start a campaign
 

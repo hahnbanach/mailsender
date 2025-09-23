@@ -19,14 +19,74 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 
+SENSITIVE_HEADERS = {"authorization", "cookie"}
+
+
+def _redact_headers(headers):
+    return {
+        key: ("***redacted***" if key.lower() in SENSITIVE_HEADERS else value)
+        for key, value in headers.items()
+    }
+
+
+def _format_body_preview(body: bytes, limit: int = 2048) -> str:
+    if not body:
+        return ""
+    try:
+        text = body.decode("utf-8")
+    except UnicodeDecodeError:
+        text = body.decode("utf-8", errors="replace")
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit]}...<truncated {len(text) - limit} chars>"
+
+
+def _log_call_details(
+    request: Request,
+    response,
+    request_body: bytes,
+    duration_ms: float,
+    error: Exception | None,
+):
+    client = request.client
+    client_repr = f"{client.host}:{client.port}" if client else "unknown"
+    query = request.url.query
+    full_path = request.url.path + (f"?{query}" if query else "")
+    request_headers = _redact_headers(request.headers)
+    response_headers = _redact_headers(response.headers) if response else {}
+    request_body_preview = _format_body_preview(request_body)
+    status_code = response.status_code if response else 500
+    error_suffix = f" error={error!r}" if error else ""
+
+    logger.debug(
+        "HTTP %s %s from %s headers=%s body=%s -> %d in %.2fms response_headers=%s%s",
+        request.method,
+        full_path,
+        client_repr,
+        request_headers,
+        request_body_preview,
+        status_code,
+        duration_ms,
+        response_headers,
+        error_suffix,
+    )
+
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    logger.debug("HTTP %s %s", request.method, request.url.path)
-    response = await call_next(request)
-    logger.debug(
-        "HTTP %s %s -> %d", request.method, request.url.path, response.status_code
-    )
-    return response
+    request_body = await request.body()
+    start = time.perf_counter()
+    response = None
+    error = None
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as exc:  # pragma: no cover - defensive logging
+        error = exc
+        raise
+    finally:
+        duration_ms = (time.perf_counter() - start) * 1000
+        _log_call_details(request, response, request_body, duration_ms, error)
 
 
 class TrackingEvent(BaseModel):
